@@ -25,7 +25,7 @@ USE `attendancedb`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `signinsheet` (
   `personID` int DEFAULT NULL,
-  `signInTime` datetime DEFAULT NULL,
+  `signInTime` datetime NOT NULL,
   `timeToday` int DEFAULT NULL,
    PRIMARY KEY (`signInTime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

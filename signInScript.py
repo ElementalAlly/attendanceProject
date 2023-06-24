@@ -1,12 +1,19 @@
+import os
 import pymysql.cursors
 import datetime
 import subprocess
 
+from dotenv import load_dotenv
+load_dotenv()
+
+localUser = os.getenv("user")
+localPassword = os.getenv("password")
+
 subprocess.Popen(["uvicorn", "app.main:app", "--reload", "--port", "80"])
 
 connection = pymysql.connect(host="localhost",
-                             user="root",
-                             password="NBzfFJ#k4$DYHbV94i*7",
+                             user=localUser,
+                             password=localPassword,
                              database="attendancedb")
 
 with connection:
@@ -14,14 +21,10 @@ with connection:
         userID = input("What is your id?\n")
         with connection.cursor() as cursor:
             query = f"SELECT * FROM signInSheet WHERE personID = {userID} and signInTime = (SELECT max(signInTime) FROM signInSheet WHERE personID={userID});"
-            print(query)
             cursor.execute(query)
             mostRecentEntry = cursor.fetchone()
-        print(mostRecentEntry)
         if mostRecentEntry:
             if not mostRecentEntry[2]:
-                print(mostRecentEntry[1].date())
-                print(datetime.datetime.today().date())
                 if mostRecentEntry[1].date() == datetime.datetime.today().date():
                     with connection.cursor() as cursor:
                         timeTodayProc = datetime.datetime.now()-mostRecentEntry[1]
@@ -46,5 +49,4 @@ with connection:
                 query = f"INSERT INTO signInSheet (personID, signInTime) VALUES ({userID}, CURRENT_TIMESTAMP)"
                 cursor.execute(query)
                 print("Signed in!")
-        print(query)
         connection.commit()
