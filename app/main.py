@@ -65,7 +65,7 @@ def reports_name_post(request: Request, name: str = Form(...)):
             query = f"SELECT personID FROM registry WHERE memberName = '{name}';"
             cursor.execute(query)
             ID = cursor.fetchone()[0]
-            query = f"SELECT timeToday FROM signInSheet WHERE personID = {ID};"
+            query = f"SELECT timeToday FROM signinsheet WHERE personID = {ID};"
             cursor.execute(query)
             allTimes = cursor.fetchall()
     totalTime = 0
@@ -84,7 +84,7 @@ def reports_ID_post(request: Request, ID: int = Form(...)):
                                  database="attendancedb")
     with connection:
         with connection.cursor() as cursor:
-            query = f"SELECT timeToday FROM signInSheet WHERE personID = {ID};"
+            query = f"SELECT timeToday FROM signinsheet WHERE personID = {ID};"
             cursor.execute(query)
             allTimes = cursor.fetchall()
     print(allTimes)

@@ -22,7 +22,7 @@ with connection:
     while True:
         userID = input("What is your id?\n")
         with connection.cursor() as cursor:
-            query = f"SELECT * FROM signInSheet WHERE personID = {userID} and signInTime = (SELECT max(signInTime) FROM signInSheet WHERE personID={userID});"
+            query = f"SELECT * FROM signinsheet WHERE personID = {userID} and signInTime = (SELECT max(signInTime) FROM signinsheet WHERE personID={userID});"
             cursor.execute(query)
             mostRecentEntry = cursor.fetchone()
         if mostRecentEntry:
@@ -31,24 +31,24 @@ with connection:
                     with connection.cursor() as cursor:
                         timeTodayProc = datetime.datetime.now()-mostRecentEntry[1]
                         timeToday = timeTodayProc.total_seconds()
-                        query = f"UPDATE signInSheet SET timeToday = {timeToday} WHERE signInTime = '{mostRecentEntry[1]}'"
+                        query = f"UPDATE signinsheet SET timeToday = {timeToday} WHERE signInTime = '{mostRecentEntry[1]}'"
                         cursor.execute(query)
                         print("Signed out!")
                 else:
                     with connection.cursor() as cursor:
-                        query = f"UPDATE signInSheet SET timeToday = {60*60*2} WHERE signInTime = '{mostRecentEntry[1]}'"
+                        query = f"UPDATE signinsheet SET timeToday = {60*60*2} WHERE signInTime = '{mostRecentEntry[1]}'"
                         cursor.execute(query)
-                        query = f"INSERT INTO signInSheet (personID, signInTime) VALUES ({userID}, CURRENT_TIMESTAMP)"
+                        query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ({userID}, CURRENT_TIMESTAMP)"
                         cursor.execute(query)
                         print("Signed in! (time yesterday reset to 2 hrs)")
             else:
                 with connection.cursor() as cursor:
-                    query = f"INSERT INTO signInSheet (personID, signInTime) VALUES ({userID}, CURRENT_TIMESTAMP)"
+                    query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ({userID}, CURRENT_TIMESTAMP)"
                     cursor.execute(query)
                     print("Signed in!")
         else:
             with connection.cursor() as cursor:
-                query = f"INSERT INTO signInSheet (personID, signInTime) VALUES ({userID}, CURRENT_TIMESTAMP)"
+                query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ({userID}, CURRENT_TIMESTAMP)"
                 cursor.execute(query)
                 print("Signed in!")
         connection.commit()
