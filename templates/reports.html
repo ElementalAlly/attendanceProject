@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% set active_page = "reports" %}
+
+{% block title %}Reports{% endblock %}
+
+{% block head %}
+{{ super() }}
+
+
+{% endblock %}
+
+{% block page_content %}
+{% if yourname %}
+<h2> Hello {{yourname}}, your ID has been registered as {{yourID}}.</h2>
+{% endif %}
+<h1 class="cap">Reports</h1>
+<br>
+<h3>If you have your name registered, find your report here:</h3>
+<form action="/reportNamePost" method="post">
+   <label for="name">Your Name: </label>
+   <input type="text" id="name" name="name" value=""> <br>
+   <input type="submit" value="View Report!">
+</form>
+<br>
+<h3>If you don't, find your report here:</h3>
+<form action="/reportIDPost" method="post">
+   <label for="ID">Your ID: </label>
+   <input type="text" id="ID" name="ID" value=0> <br>
+   <input type="submit" value="See your Report!">
+</form>
+<br>
+{% if report %}
+<h2> Your report:</h2>
+{{report}}
+{% endif %}
+<br>
+{{error}}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+
+{% endblock %}
