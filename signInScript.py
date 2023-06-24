@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import pathlib
 import os
 import pymysql.cursors
 import datetime
@@ -11,7 +12,9 @@ load_dotenv()
 localUser = os.getenv("user")
 localPassword = os.getenv("password")
 
-subprocess.Popen(["uvicorn", "app.main:app", "--reload", "--port", "80"])
+current_dir = pathlib.Path(__file__).parent
+
+subprocess.Popen(["uvicorn", "app.main:app", "--reload", "--port", "80"], cwd=str(current_dir))
 
 connection = pymysql.connect(host="localhost",
                              user=localUser,
