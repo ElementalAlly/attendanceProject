@@ -31,7 +31,7 @@ def register_get(request: Request):
 
 
 @app.post("/registerPost", response_class=HTMLResponse)
-def register_post(request: Request, name: str = Form(...), ID: int = Form(...)):
+def register_post(request: Request, name: str = Form(...), ID: str = Form(...)):
     yourname = name
     yourID = ID
     if yourID != 0:
@@ -77,7 +77,7 @@ def reports_name_post(request: Request, name: str = Form(...)):
 
 
 @app.post("/reportIDPost", response_class=HTMLResponse)
-def reports_ID_post(request: Request, ID: int = Form(...)):
+def reports_ID_post(request: Request, ID: str = Form(...)):
     connection = pymysql.connect(host="localhost",
                                  user=localUser,
                                  password=localPassword,
