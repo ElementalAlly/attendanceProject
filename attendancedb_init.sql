@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS `signinsheet` (
 CREATE TABLE `registry` (
   `personID` text NOT NULL,
   `memberName` text,
-  PRIMARY KEY (`personID`)
+  PRIMARY KEY (`personID`(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
 -- Dump completed on 2023-06-24 17:07:06
