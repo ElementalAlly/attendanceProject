@@ -24,7 +24,7 @@ USE `attendancedb`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `signinsheet` (
-  `personID` int DEFAULT NULL,
+  `personID` text DEFAULT NULL,
   `signInTime` datetime NOT NULL,
   `timeToday` int DEFAULT NULL,
    PRIMARY KEY (`signInTime`)
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `signinsheet` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 CREATE TABLE `registry` (
-  `personID` int NOT NULL,
+  `personID` text NOT NULL,
   `memberName` text,
   PRIMARY KEY (`personID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
