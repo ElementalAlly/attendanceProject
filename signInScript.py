@@ -14,7 +14,7 @@ localPassword = os.getenv("password")
 
 current_dir = pathlib.Path(__file__).parent
 
-subprocess.Popen(["uvicorn", "app.main:app", "--reload", "--port", "80"], cwd=str(current_dir))
+subprocess.Popen(["uvicorn", "--host", "0.0.0.0", "app.main:app", "--reload", "--port", "80"], cwd=str(current_dir))
 
 connection = pymysql.connect(host="localhost",
                              user=localUser,
