@@ -90,7 +90,8 @@ def reports_ID_post(request: Request, ID: int = Form(...)):
     print(allTimes)
     totalTime = 0
     for time in allTimes:
-        totalTime += time[0]
+        if time[0]:
+            totalTime += time[0]
     print(totalTime)
     totalTime = totalTime / 3600
     report = f"You've spent {totalTime} hours in robotics this season."
