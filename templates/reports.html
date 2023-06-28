@@ -5,7 +5,7 @@
 
 {% block head %}
 {{ super() }}
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 
 {% endblock %}
 
@@ -15,26 +15,54 @@
 {% endif %}
 <h1 class="cap">Reports</h1>
 <br>
-<h3>If you have your name registered, find your report here:</h3>
-<form action="/reportNamePost" method="post">
-   <label for="name">Your Name: </label>
-   <input type="text" id="name" name="name" value=""> <br>
-   <input type="submit" value="View Report!">
-</form>
-<br>
-<h3>If you don't, find your report here:</h3>
-<form action="/reportIDPost" method="post">
-   <label for="ID">Your ID: </label>
-   <input type="text" id="ID" name="ID" value=""> <br>
-   <input type="submit" value="See your Report!">
-</form>
-<br>
+
+<h3>Input your id/name to find your report. You can also input a time range. Please input your desired date as yyyy-mm-dd:</h3>
+<form action="/reportPost" method="post">
+   <label for="identification">Your name or ID: </label>
+   <input type="text" id="identification" name="identification" value=""> <br>
+   <label for="fromDate">From (yyyy-mm-dd, default 0000-00-00): </label>
+   <input type="text" id="fromDate" name="fromDate" value="0000-00-00"> <br>
+   <label for="toDate">To (yyyy-mm-dd, default 0000-00-00): </label>
+   <input type="text" id="toDate" name="toDate" value="0000-00-00"> <br>
+   <input type="submit" value="View report">
+</form> <br>
+
 {% if report %}
 <h2> Your report:</h2>
 {{report}}
+<canvas id="reportChart" style="width:100%;max-width:600px"></canvas>
+{% if titleValue %}
+<script>
+
+var xValues = [{% for dv in dateValues%}"{{dv}}",{%endfor%}
+];
+var yValues = {{timeValues}};
+var titleValue = "{{titleValue}}";
+
+new Chart("reportChart", {
+   type: "bar",
+   data: {
+      labels: xValues,
+      datasets: [{
+         backgroundColor: "blue",
+         data: yValues
+      }]
+   },
+   options: {
+      legend: {display: false},
+      title: {
+         display: true,
+         text: titleValue
+      }
+   }
+});
+
+</script>
+
+{% endif %}
 {% endif %}
 <br>
-{{error}}
+<h2>{{error}}</h2>
 
 {% endblock %}
 
