@@ -4,8 +4,30 @@ import pathlib
 import os
 import pymysql.cursors
 import datetime
+from time import sleep
+
+import OPi.GPIO as GPIO
+import orangepi.zero2
 
 from dotenv import load_dotenv
+
+greenPort = 11
+redPort = 13
+
+GPIO.setmode(orangepi.zero2.BOARD)
+
+
+def signal(signIn):
+    sleepTime = 0.5
+    if signIn:
+        port = greenPort
+    else:
+        port = redPort
+    GPIO.output(port, 0)
+    sleep(sleepTime)
+    GPIO.output(port, 1)
+
+
 load_dotenv()
 
 localUser = os.getenv("user")
@@ -34,6 +56,7 @@ with connection:
                         query = f"UPDATE signinsheet SET timeToday = {timeToday} WHERE signInTime = '{mostRecentEntry[1]}'"
                         cursor.execute(query)
                         print("Signed out!")
+                        signal(signIn=False)
                 else:
                     with connection.cursor() as cursor:
                         query = f"UPDATE signinsheet SET timeToday = {60*60*2} WHERE signInTime = '{mostRecentEntry[1]}'"
@@ -41,14 +64,17 @@ with connection:
                         query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ('{userID}', CURRENT_TIMESTAMP)"
                         cursor.execute(query)
                         print("Signed in! (time yesterday reset to 2 hrs)")
+                        signal(signIn=True)
             else:
                 with connection.cursor() as cursor:
                     query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ('{userID}', CURRENT_TIMESTAMP)"
                     cursor.execute(query)
                     print("Signed in!")
+                    signal(signIn=True)
         else:
             with connection.cursor() as cursor:
                 query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ('{userID}', CURRENT_TIMESTAMP)"
                 cursor.execute(query)
                 print("Signed in!")
+                signal(signIn=True)
         connection.commit()
