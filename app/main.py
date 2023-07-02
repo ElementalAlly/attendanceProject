@@ -104,4 +104,4 @@ def reports_post(request: Request, identification: str = Form(...), fromDate: st
         report = f"Hello {name}, your ID is {ID} and you've spent {totalTime} hours from {fromDate[0:10]} to {toDate.year}-{toDate.month}-{toDate.day} in robotics this season!"
     else:
         report = f"Your ID is {ID} and you've spent {totalTime} hours from {fromDate[0:10]} to {toDate.year}-{toDate.month}-{toDate.day} in robotics this season! (btw, you don't have a name registered to your ID, you may want to visit the register page here :) )"
-    return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": allDates, "timeValues": allTimes, "titleValue": f"Report from {allDates[0]} to {allDates[-1]} for {ID}:"})
+    return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": allDates, "timeValues": allTimes, "titleValue": f"Report from {fromDate[0:10]} to {toDate.year}-{toDate.month}-{toDate.day} for {ID}:"})
