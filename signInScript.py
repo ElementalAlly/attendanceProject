@@ -24,7 +24,7 @@ GPIO.output(redPort, 1)
 
 
 def signal(signIn):
-    sleepTime = 0.5
+    sleepTime = 1.1
     if signIn:
         port = greenPort
     else:
