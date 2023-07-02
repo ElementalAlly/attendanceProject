@@ -85,9 +85,13 @@ def reports_post(request: Request, identification: str = Form(...), fromDate: st
             if fromDate != "0000-00-00":
                 fromDate = fromDate + " 00:00:00"
             else:
-                fromDate = "2000-01-01 00:00:00"
+                now = datetime.datetime.now()
+                if now.month < 6:
+                    fromDate = f"{now.year-1}-06-01 00:00:00"
+                else:
+                    fromDate = f"{now.year}-06-01 00:00:00"
             if toDate != "0000-00-00":
-                toDate = toDate + " 00:00:00"
+                toDate = toDate + " 23:59:59"
             else:
                 toDate = datetime.datetime.now()
             query = f"SELECT timeToday, signInTime FROM signinsheet WHERE personID = '{ID}' AND signInTime > '{fromDate}' AND signInTime < '{toDate}'"
