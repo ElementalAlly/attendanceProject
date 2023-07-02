@@ -15,6 +15,8 @@ greenPort = 11
 redPort = 13
 
 GPIO.setmode(orangepi.zero2.BOARD)
+GPIO.setup(greenPort, GPIO.OUT)
+GPIO.setup(redPort, GPIO.OUT)
 
 
 def signal(signIn):
