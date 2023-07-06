@@ -94,6 +94,7 @@ def reports_post(request: Request, identification: str = Form(...), fromDate: st
                 toDate = toDate + " 23:59:59"
             else:
                 toDate = datetime.datetime.now()
+                toDate = toDate.strftime("%Y-%m-%d %H:%M:%S")
             query = f"SELECT timeToday, signInTime FROM signinsheet WHERE personID = '{ID}' AND signInTime > '{fromDate}' AND signInTime < '{toDate}'"
             cursor.execute(query)
             allEntries = cursor.fetchall()
@@ -105,7 +106,7 @@ def reports_post(request: Request, identification: str = Form(...), fromDate: st
         allTimes.append(entry[0]/3600)
         totalTime += entry[0]/3600
     if name:
-        report = f"Hello {name}, your ID is {ID} and you've spent {totalTime} hours from {fromDate[0:10]} to {toDate.year}-{toDate.month}-{toDate.day} in robotics this season!"
+        report = f"Hello {name}, your ID is {ID} and you've spent {totalTime} hours from {fromDate[0:10]} to {toDate[0:10]} in robotics this season!"
     else:
-        report = f"Your ID is {ID} and you've spent {totalTime} hours from {fromDate[0:10]} to {toDate.year}-{toDate.month}-{toDate.day} in robotics this season! (btw, you don't have a name registered to your ID, you may want to visit the register page here :) )"
-    return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": allDates, "timeValues": allTimes, "titleValue": f"Report from {fromDate[0:10]} to {toDate.year}-{toDate.month}-{toDate.day} for {ID}:"})
+        report = f"Your ID is {ID} and you've spent {totalTime} hours from {fromDate[0:10]} to {toDate[0:10]} in robotics this season! (btw, you don't have a name registered to your ID, you may want to visit the register page here :) )"
+    return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": allDates, "timeValues": allTimes, "titleValue": f"Report from {fromDate[0:10]} to {toDate[0:10]} for {ID}:"})
