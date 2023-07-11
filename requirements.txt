@@ -7,3 +7,5 @@ python-multipart==0.0.5
 jinja2==3.0.2
 Markdown==3.3.4
 pymysql==1.0.3
+numpy==1.25.1
+pandas==2.0.3

@@ -6,32 +6,32 @@ import pymysql.cursors
 import datetime
 from time import sleep
 
-#import OPi.GPIO as GPIO
-#import orangepi.zero2
+import OPi.GPIO as GPIO
+import orangepi.zero2
 
 from dotenv import load_dotenv
 
 greenPort = 11
 redPort = 13
 
-#GPIO.setmode(orangepi.zero2.BOARD)
-#GPIO.setup(greenPort, GPIO.OUT)
-#GPIO.setup(redPort, GPIO.OUT)
-#sleep(1)
+GPIO.setmode(orangepi.zero2.BOARD)
+GPIO.setup(greenPort, GPIO.OUT)
+GPIO.setup(redPort, GPIO.OUT)
+sleep(1)
 
-#GPIO.output(greenPort, 1)
-#GPIO.output(redPort, 1)
+GPIO.output(greenPort, 1)
+GPIO.output(redPort, 1)
 
-#
-#def signal(signIn):
-#    sleepTime = 1.1
-#    if signIn:
-#        port = greenPort
-#    else:
-#        port = redPort
-#    GPIO.output(port, 0)
-#    sleep(sleepTime)
-#    GPIO.output(port, 1)
+
+def signal(signIn):
+    sleepTime = 1.1
+    if signIn:
+        port = greenPort
+    else:
+        port = redPort
+    GPIO.output(port, 0)
+    sleep(sleepTime)
+    GPIO.output(port, 1)
 
 
 load_dotenv()
@@ -62,7 +62,7 @@ with connection:
                         query = f"UPDATE signinsheet SET timeToday = {timeToday} WHERE signInTime = '{mostRecentEntry[1]}'"
                         cursor.execute(query)
                         print("Signed out!")
-                #        signal(signIn=False)
+                        signal(signIn=False)
                 else:
                     with connection.cursor() as cursor:
                         query = f"UPDATE signinsheet SET timeToday = {60*60*2} WHERE signInTime = '{mostRecentEntry[1]}'"
@@ -70,17 +70,17 @@ with connection:
                         query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ('{userID}', CURRENT_TIMESTAMP)"
                         cursor.execute(query)
                         print("Signed in! (time yesterday reset to 2 hrs)")
-                #        signal(signIn=True)
+                        signal(signIn=True)
             else:
                 with connection.cursor() as cursor:
                     query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ('{userID}', CURRENT_TIMESTAMP)"
                     cursor.execute(query)
                     print("Signed in!")
-                #    signal(signIn=True)
+                    signal(signIn=True)
         else:
             with connection.cursor() as cursor:
                 query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ('{userID}', CURRENT_TIMESTAMP)"
                 cursor.execute(query)
                 print("Signed in!")
-                #signal(signIn=True)
+                signal(signIn=True)
         connection.commit()
