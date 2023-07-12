@@ -6,20 +6,31 @@ from fastapi.templating import Jinja2Templates
 from .library.helpers import openfile
 import pymysql.cursors
 import datetime
-import numpy
-import pandas
+import csv
 import io
 
 from dotenv import load_dotenv
 load_dotenv()
 
-localUser = os.getenv("user")
-localPassword = os.getenv("password")
+LOCAL_USER = os.getenv("user")
+LOCAL_PASSWORD = os.getenv("password")
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+def calc_date(date1, date2):
+    now = datetime.datetime.now()
+    if not date1:
+        if now.month < 6:
+            date1 = f"{now.year-1}-06-01 00:00:00"
+        else:
+            date1 = f"{now.year}-06-01 00:00:00"
+    if not date2:
+        date2 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return (date1, date2)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -35,28 +46,28 @@ def register_get(request: Request):
 
 
 @app.post("/registerPost", response_class=HTMLResponse)
-def register_post(request: Request, name: str = Form(...), ID: str = Form(...)):
-    yourname = name
-    yourID = ID
-    if yourID:
+def register_post(request: Request, name: str = Form(...), user_id: str = Form(...)):
+    your_name = name
+    your_id = user_id
+    if your_id:
         connection = pymysql.connect(host="localhost",
-                                     user=localUser,
-                                     password=localPassword,
+                                     user=LOCAL_USER,
+                                     password=LOCAL_PASSWORD,
                                      database="attendancedb")
         with connection:
             with connection.cursor() as cursor:
-                query = f"SELECT memberName FROM registry WHERE personID = '{yourID}'"
+                query = f"SELECT memberName FROM registry WHERE personID = '{your_id}'"
                 cursor.execute(query)
                 if cursor.fetchone():
                     return templates.TemplateResponse('register.html', context={"request": request, "error": "ID already taken."})
-                query = f"SELECT personID FROM registry WHERE memberName = '{yourname}'"
+                query = f"SELECT personID FROM registry WHERE memberName = '{your_name}'"
                 cursor.execute(query)
                 if cursor.fetchone():
                     return templates.TemplateResponse('register.html', context={"request": request, "error": "Name already taken."})
-                query = f"INSERT INTO registry VALUES ('{yourID}', '{yourname}');"
+                query = f"INSERT INTO registry VALUES ('{your_id}', '{your_name}');"
                 cursor.execute(query)
             connection.commit()
-        return templates.TemplateResponse('register.html', context={"request": request, "yourname": yourname, "yourID": yourID})
+        return templates.TemplateResponse('register.html', context={"request": request, "your_name": your_name, "your_id": your_id})
     return templates.TemplateResponse('register.html', context={"request": request, "error": "Please input an ID."})
 
 
@@ -66,144 +77,126 @@ def reports_get(request: Request):
 
 
 @app.post("/reportPost", response_class=HTMLResponse)
-def reports_post(request: Request, identification: str = Form(...), fromDate: str = Form(...), toDate: str = Form(...)):
+def reports_post(request: Request, identification: str = Form(...), from_date: str = Form(...), to_date: str = Form(...)):
     connection = pymysql.connect(host="localhost",
-                                 user=localUser,
-                                 password=localPassword,
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
                                  database="attendancedb")
     with connection:
         with connection.cursor() as cursor:
             query = f"SELECT personID FROM registry WHERE memberName = '{identification}'"
             cursor.execute(query)
-            ID = cursor.fetchone()
-            if ID:
-                ID = ID[0]
+            user_id = cursor.fetchone()
+            if user_id:
+                user_id = user_id[0]
                 name = identification
             else:
-                ID = identification
-                query = f"SELECT memberName FROM registry WHERE personID = '{ID}'"
+                user_id = identification
+                query = f"SELECT memberName FROM registry WHERE personID = '{user_id}'"
                 cursor.execute(query)
                 name = cursor.fetchone()
                 if name:
                     name = name[0]
-            if fromDate != "0000-00-00":
-                fromDate = fromDate + " 00:00:00"
+            if from_date != "0000-00-00":
+                from_date = from_date + " 00:00:00"
             else:
                 now = datetime.datetime.now()
                 if now.month < 6:
-                    fromDate = f"{now.year-1}-06-01 00:00:00"
+                    from_date = f"{now.year-1}-06-01 00:00:00"
                 else:
-                    fromDate = f"{now.year}-06-01 00:00:00"
-            if toDate != "0000-00-00":
-                toDate = toDate + " 23:59:59"
+                    from_date = f"{now.year}-06-01 00:00:00"
+            if to_date != "0000-00-00":
+                to_date = to_date + " 23:59:59"
             else:
-                toDate = datetime.datetime.now()
-                toDate = toDate.strftime("%Y-%m-%d %H:%M:%S")
-            query = f"SELECT timeToday, signInTime FROM signinsheet WHERE personID = '{ID}' AND signInTime > '{fromDate}' AND signInTime < '{toDate}'"
+                to_date = datetime.datetime.now()
+                to_date = to_date.strftime("%Y-%m-%d %H:%M:%S")
+            query = f"SELECT timeToday, signInTime FROM signinsheet WHERE personID = '{user_id}' AND signInTime > '{from_date}' AND signInTime < '{to_date}'"
             cursor.execute(query)
             allEntries = cursor.fetchall()
-    totalTime = 0
-    allTimes = []
-    allDates = []
+    total_time = 0
+    all_times = []
+    all_dates = []
     for entry in allEntries:
-        allDates.append(entry[1].strftime("%Y-%m-%d"))
-        allTimes.append(entry[0]/3600)
-        totalTime += entry[0]/3600
+        all_dates.append(entry[1].strftime("%Y-%m-%d"))
+        all_times.append(entry[0]/3600)
+        total_time += entry[0]/3600
     if name:
-        report = f"Hello {name}, your ID is {ID} and you've spent {totalTime} hours from {fromDate[0:10]} to {toDate[0:10]} in robotics this season!"
+        report = f"Hello {name}, your ID is {user_id} and you've spent {total_time} hours from {from_date[0:10]} to {to_date[0:10]} in robotics this season!"
     else:
-        report = f"Your ID is {ID} and you've spent {totalTime} hours from {fromDate[0:10]} to {toDate[0:10]} in robotics this season! (btw, you don't have a name registered to your ID, you may want to visit the register page here :) )"
-    return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": allDates, "timeValues": allTimes, "titleValue": f"Report from {fromDate[0:10]} to {toDate[0:10]} for {ID}:"})
+        report = f"Your ID is {user_id} and you've spent {total_time} hours from {from_date[0:10]} to {to_date[0:10]} in robotics this season! (btw, you don't have a name registered to your ID, you may want to visit the register page here :) )"
+    return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": all_dates, "timeValues": all_times, "titleValue": f"Report from {from_date[0:10]} to {to_date[0:10]} for {user_id}:"})
 
 
 @app.get("/admin", response_class=HTMLResponse)
-async def adminHome(request: Request):
+async def admin_home(request: Request):
     return templates.TemplateResponse('adminHome.html', context={"request": request})
 
 
 @app.get("/admin/report", response_class=HTMLResponse)
-async def adminReport(
-    request: Request,
-    fromDate: str = None,
-    toDate: str = None
-):
-    data = []
-    now = datetime.datetime.now()
-    if not fromDate:
-        if now.month < 6:
-            fromDate = f"{now.year-1}-06-01 00:00:00"
-        else:
-            fromDate = f"{now.year}-06-01 00:00:00"
-    if not toDate:
-        toDate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+async def admin_report(request: Request):
+    from_date, to_date = calc_date(None, None)
     connection = pymysql.connect(host="localhost",
-                                 user=localUser,
-                                 password=localPassword,
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
                                  database="attendancedb")
+    data = {}
     with connection:
         with connection.cursor() as cursor:
-            query = "SELECT * FROM registry;"
+            query = f"""SELECT
+            registry.memberName,
+            signinsheet.personID,
+            signinsheet.signInTime,
+            signinsheet.timeToday
+            FROM
+            signinsheet
+            INNER JOIN registry USING(personID)
+            WHERE signInTime > '{from_date}' AND signInTime < '{to_date}'
+            ORDER BY signInTime;"""
             cursor.execute(query)
-            allNames = cursor.fetchall()
-            for name in allNames:
-                data.append([name[0], name[1], 0])
-            for i in range(len(data)):
-                query = f"SELECT * FROM signinsheet WHERE personID = '{data[i][0]}' AND signInTime > '{fromDate}' AND signInTime < '{toDate}'"
-                cursor.execute(query)
-                personData = cursor.fetchall()
-                for entry in personData:
-                    data[i].append([entry[1], entry[2]/3600])
-                    data[i][2] += entry[2]
-                data[i][2] /= 3600
+            for row in cursor:
+                try:
+                    data[(row[0], row[1])].append([row[2], row[3]/3600])
+                    data[(row[0], row[1])][0] += row[3]/3600
+                except KeyError:
+                    data[(row[0], row[1])] = [0]
+                    data[(row[0], row[1])].append([row[2], row[3]/3600])
+                    data[(row[0], row[1])][0] += row[3]/3600
     return templates.TemplateResponse('adminReports.html', context={"request": request, "data": data})
 
 
 @app.get("/admin/csv", response_class=StreamingResponse)
-async def adminCSV(
-    request: Request,
-    fromDate: str = None,
-    toDate: str = None
-):
+async def admin_csv(request: Request):
     data = []
-    idsIndices = {}
-    now = datetime.datetime.now()
-    if not fromDate:
-        if now.month < 6:
-            fromDate = f"{now.year-1}-06-01 00:00:00"
-        else:
-            fromDate = f"{now.year}-06-01 00:00:00"
-    if not toDate:
-        toDate = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    from_date, to_date = calc_date(None, None)
     connection = pymysql.connect(host="localhost",
-                                 user=localUser,
-                                 password=localPassword,
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
                                  database="attendancedb")
     with connection:
         with connection.cursor() as cursor:
-            query = "SELECT * FROM registry;"
+            query = "SELECT memberName, personID FROM registry;"
             cursor.execute(query)
             registry = cursor.fetchall()
-            for i in range(len(registry)):
-                idsIndices[registry[i][0]] = i
-            query = f"SELECT * FROM signinsheet WHERE signInTime > '{fromDate}' AND signInTime < '{toDate}'"
+            query = f"""SELECT
+            registry.memberName,
+            signinsheet.personID,
+            signinsheet.signInTime,
+            signinsheet.timeToday
+            FROM
+            signinsheet
+            LEFT JOIN registry USING(personID)
+            WHERE signInTime > '{from_date}' AND signInTime < '{to_date}'
+            ORDER BY signInTime;"""
             cursor.execute(query)
-            signIns = cursor.fetchall()
-            for i in range(len(signIns)):
-                data.append([None, None, None, None])
-                data[i][1] = signIns[i][0]
-                data[i][2] = signIns[i][1]
-                data[i][3] = signIns[i][2]
-                try:
-                    data[i][0] = registry[idsIndices[data[i][1]]][1]
-                except KeyError:
-                    pass
+            data = list(cursor.fetchall())
             data.append([None, None, None, None])
             data.append(["Registered ID", "Registered Name", None, None])
             for i in range(len(registry)):
                 data.append([registry[i][0], registry[i][1], None, None])
-    dataFrame = numpy.asarray(data)
-    dataStream = io.StringIO()
-    pandas.DataFrame(dataFrame).to_csv(dataStream, index=False, header=["Name", "ID", "Time of sign in", "Time spent (secs)"])
-    response = StreamingResponse(iter([dataStream.getvalue()]), media_type="text/csv")
-    response.headers["Content-Disposition"] = f"attachment; filename={fromDate[0:4]}-{int(fromDate[0:4]) + 1}SeasonalAttendanceReport.csv"
+    data_stream = io.StringIO()
+    report = csv.writer(data_stream)
+    for row in data:
+        report.writerow(row)
+    response = StreamingResponse(iter([data_stream.getvalue()]), media_type="text/csv")
+    response.headers["Content-Disposition"] = f"attachment; filename={from_date[0:4]}-{int(from_date[0:4]) + 1}SeasonalAttendanceReport.csv"
     return response

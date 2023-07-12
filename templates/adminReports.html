@@ -10,16 +10,16 @@
 
 {% block page_content %}
 
-{% for entry in data %}
-<h2>{{entry[1]}}'s (id: {{entry[0]}}) total hours: {{entry[2]}}<h2>
-<canvas id='{{entry[1]}}' style="width:100%;max-width:400px"></canvas>
+{% for key, value in data.items() %}
+<h2>{{key[0]}}'s (id: {{key[1]}}) total hours: {{value[0]}}<h2>
+<canvas id='{{key[0]}}' style="width:100%;max-width:400px"></canvas>
 <script>
 
-var xValues = [{% for dv in entry %}{% if loop.index0 >= 3 %}"{{dv[0]}}",{% endif %}{%endfor%}];
-var yValues = [{% for dv in entry %}{% if loop.index0 >= 3 %}"{{dv[1]}}",{% endif %}{%endfor%}];
-var titleValue = "{{entry[1]}}'s times";
+var xValues = [{% for dv in value %}{% if loop.index0 >= 1 %}"{{dv[0]}}",{% endif %}{%endfor%}];
+var yValues = [{% for dv in value %}{% if loop.index0 >= 1 %}"{{dv[1]}}",{% endif %}{%endfor%}];
+var titleValue = "{{key[0]}}'s times";
 
-new Chart("{{entry[1]}}", {
+new Chart("{{key[0]}}", {
    type: "bar",
    data: {
       labels: xValues,
