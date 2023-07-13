@@ -57,8 +57,8 @@ def sign_in(cursor, ID):
     blink_led(sign_in=True)
 
 
-
-def main(connection):
+def main():
+    connection = init()
     with connection:
         while True:
             userID = input("What is your id?\n")
@@ -91,5 +91,4 @@ def main(connection):
 
 
 if __name__ == "__main__":
-    connection = init()
-    main(connection)
+    main()

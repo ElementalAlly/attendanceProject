@@ -1,2 +1,3 @@
 projectVEnv/
 .env
+__pycache__/
