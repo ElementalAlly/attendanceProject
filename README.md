@@ -200,5 +200,5 @@ In this, I use:
 ## Scripts:
 Say ~ is wherever attendanceProject is:
 
-~/attendancetracker/__main__.py (sign in/sign out logic)
+~/attendancetracker/\_\_main\_\_.py (sign in/sign out logic)
 ~/attendancetracker/app/main.py (website logic)
