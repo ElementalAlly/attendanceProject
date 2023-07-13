@@ -35,7 +35,7 @@ pip install --upgrade pip
 Without the latest version of pip, pyproject.toml won't work.
 
 ```
-pip install attendancetracker
+pip install -e .
 git clone https://github.com/rm-hull/OPi.GPIO.git
 pip install -e OPi.GPIO/
 ```
