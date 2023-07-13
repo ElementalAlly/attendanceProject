@@ -3,7 +3,7 @@ name = "attendancetracker"
 version = "0.1.0"
 description = ""
 authors = ["Ethan Djajadi <ethan.djajadi@gmail.com>"]
-# readme = "README.md"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"

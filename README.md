@@ -155,6 +155,37 @@ What is your id?
 
 ```
 
+Finally, we can set up the hostname on the device and broadcast it, to make accessing reports and registration easier:
+
+```
+<editor> /etc/hostname
+```
+
+## Hostname:
+```
+<hostname you want>
+```
+
+Then:
+
+```
+apt-get install avahi-daemon
+```
+
+This is the hostname set up. You can check this by putting:
+
+```
+hostname
+```
+
+into the shell. If your hostname is displayed, you are all set!
+
+```
+shutdown -r now
+```
+
+Then, you should be able to access the host from <hostname>.local.
+
 That should be the set up!
 
 # Technologies
