@@ -1,21 +1,26 @@
 #! /usr/bin/env python3
 
-import pathlib
-import os
-import pymysql.cursors
 import datetime
+import os
+import pathlib
 from time import sleep
+from unittest.mock import Mock
 
-import OPi.GPIO as GPIO
-import orangepi.zero2
-
+import pymysql.cursors
 from dotenv import load_dotenv
+
+try:
+    import OPi.GPIO as GPIO
+    import orangepi.zero2
+except ModuleNotFoundError:
+    GPIO = Mock()
+    orangepi = Mock()
+
 
 GREEN_PORT = 11
 RED_PORT = 13
 
-TIME_TODAY = 2
-SIGN_IN_TIME = 1
+SCRIPT_DIR = pathlib.Path(__file__).parent
 
 
 def init():
@@ -26,7 +31,7 @@ def init():
 
     GPIO.output(GREEN_PORT, 1)
     GPIO.output(RED_PORT, 1)
-    load_dotenv()
+    load_dotenv(SCRIPT_DIR/".env")
 
     localUser = os.getenv("user")
     localPassword = os.getenv("password")
@@ -54,39 +59,39 @@ def sign_in(cursor, ID):
     query = f"INSERT INTO signinsheet (personID, signInTime) VALUES ('{ID}', CURRENT_TIMESTAMP)"
     cursor.execute(query)
     print("Signed in!")
-    blink_led(sign_in=True)
+
+
+def sign_out(cursor, sign_in_time, delta_time=None):
+    if not delta_time:
+        time_today_proc = datetime.datetime.now()-sign_in_time
+        delta_time = time_today_proc.total_seconds()
+    query = f"UPDATE signinsheet SET timeToday = {delta_time} WHERE signInTime = '{sign_in_time}'"
+    cursor.execute(query)
+    print("Signed out!")
 
 
 def main():
     connection = init()
+    time_today_ind = 2
+    sign_in_time_ind = 1
     with connection:
         while True:
             userID = input("What is your id?\n")
             with connection.cursor() as cursor:
                 query = f"SELECT * FROM signinsheet WHERE personID = '{userID}' and signInTime = (SELECT max(signInTime) FROM signinsheet WHERE personID='{userID}');"
                 cursor.execute(query)
-                mostRecentEntry = cursor.fetchone()
-            if mostRecentEntry:
-                if not mostRecentEntry[TIME_TODAY]:
-                    if mostRecentEntry[SIGN_IN_TIME].date() == datetime.datetime.today().date():
-                        with connection.cursor() as cursor:
-                            timeTodayProc = datetime.datetime.now()-mostRecentEntry[1]
-                            timeToday = timeTodayProc.total_seconds()
-                            query = f"UPDATE signinsheet SET timeToday = {timeToday} WHERE signInTime = '{mostRecentEntry[SIGN_IN_TIME]}'"
-                            cursor.execute(query)
-                            print("Signed out!")
-                            blink_led(sign_in=False)
+                most_recent_entry = cursor.fetchone()
+                if most_recent_entry and not most_recent_entry[time_today_ind]:
+                    if most_recent_entry[sign_in_time_ind].date() == datetime.datetime.today().date():
+                        sign_out(cursor, most_recent_entry[sign_in_time_ind])
+                        blink_led(sign_in=False)
                     else:
-                        with connection.cursor() as cursor:
-                            query = f"UPDATE signinsheet SET timeToday = {60*60*2} WHERE signInTime = '{mostRecentEntry[SIGN_IN_TIME]}'"
-                            cursor.execute(query)
-                            sign_in(cursor, userID)
-                else:
-                    with connection.cursor() as cursor:
+                        sign_out(cursor, most_recent_entry[sign_in_time_ind], 60*60*2)
                         sign_in(cursor, userID)
-            else:
-                with connection.cursor() as cursor:
+                        blink_led(sign_in=True)
+                else:
                     sign_in(cursor, userID)
+                    blink_led(sign_in=True)
             connection.commit()
 
 

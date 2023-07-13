@@ -49,26 +49,26 @@ def register_get(request: Request):
 def register_post(request: Request, name: str = Form(...), user_id: str = Form(...)):
     your_name = name
     your_id = user_id
-    if your_id:
-        connection = pymysql.connect(host="localhost",
-                                     user=LOCAL_USER,
-                                     password=LOCAL_PASSWORD,
-                                     database="attendancedb")
-        with connection:
-            with connection.cursor() as cursor:
-                query = f"SELECT memberName FROM registry WHERE personID = '{your_id}'"
-                cursor.execute(query)
-                if cursor.fetchone():
-                    return templates.TemplateResponse('register.html', context={"request": request, "error": "ID already taken."})
-                query = f"SELECT personID FROM registry WHERE memberName = '{your_name}'"
-                cursor.execute(query)
-                if cursor.fetchone():
-                    return templates.TemplateResponse('register.html', context={"request": request, "error": "Name already taken."})
-                query = f"INSERT INTO registry VALUES ('{your_id}', '{your_name}');"
-                cursor.execute(query)
-            connection.commit()
-        return templates.TemplateResponse('register.html', context={"request": request, "your_name": your_name, "your_id": your_id})
-    return templates.TemplateResponse('register.html', context={"request": request, "error": "Please input an ID."})
+    if not your_id:
+        return templates.TemplateResponse('register.html', context={"request": request, "error": "Please input an ID."})
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"SELECT memberName FROM registry WHERE personID = '{your_id}'"
+            cursor.execute(query)
+            if cursor.fetchone():
+                return templates.TemplateResponse('register.html', context={"request": request, "error": "ID already taken."})
+            query = f"SELECT personID FROM registry WHERE memberName = '{your_name}'"
+            cursor.execute(query)
+            if cursor.fetchone():
+                return templates.TemplateResponse('register.html', context={"request": request, "error": "Name already taken."})
+            query = f"INSERT INTO registry VALUES ('{your_id}', '{your_name}');"
+            cursor.execute(query)
+        connection.commit()
+    return templates.TemplateResponse('register.html', context={"request": request, "your_name": your_name, "your_id": your_id})
 
 
 @app.get("/reports", response_class=HTMLResponse)
@@ -78,6 +78,8 @@ def reports_get(request: Request):
 
 @app.post("/reportPost", response_class=HTMLResponse)
 def reports_post(request: Request, identification: str = Form(...), from_date: str = Form(...), to_date: str = Form(...)):
+    sign_in_time_ind = 1
+    time_today_ind = 0
     connection = pymysql.connect(host="localhost",
                                  user=LOCAL_USER,
                                  password=LOCAL_PASSWORD,
@@ -117,9 +119,9 @@ def reports_post(request: Request, identification: str = Form(...), from_date: s
     all_times = []
     all_dates = []
     for entry in allEntries:
-        all_dates.append(entry[1].strftime("%Y-%m-%d"))
-        all_times.append(entry[0]/3600)
-        total_time += entry[0]/3600
+        all_dates.append(entry[sign_in_time_ind].strftime("%Y-%m-%d"))
+        all_times.append(entry[time_today_ind]/3600)
+        total_time += entry[time_today_ind]/3600
     if name:
         report = f"Hello {name}, your ID is {user_id} and you've spent {total_time} hours from {from_date[0:10]} to {to_date[0:10]} in robotics this season!"
     else:
@@ -134,6 +136,10 @@ async def admin_home(request: Request):
 
 @app.get("/admin/report", response_class=HTMLResponse)
 async def admin_report(request: Request):
+    name_ind = 0
+    id_ind = 1
+    sign_in_time_ind = 2
+    time_today_ind = 3
     from_date, to_date = calc_date(None, None)
     connection = pymysql.connect(host="localhost",
                                  user=LOCAL_USER,
@@ -155,18 +161,20 @@ async def admin_report(request: Request):
             cursor.execute(query)
             for row in cursor:
                 try:
-                    data[(row[0], row[1])].append([row[2], row[3]/3600])
-                    data[(row[0], row[1])][0] += row[3]/3600
+                    data[(row[name_ind], row[id_ind])].append([row[sign_in_time_ind], row[time_today_ind]/3600])
+                    data[(row[name_ind], row[id_ind])][0] += row[time_today_ind]/3600
                 except KeyError:
-                    data[(row[0], row[1])] = [0]
-                    data[(row[0], row[1])].append([row[2], row[3]/3600])
-                    data[(row[0], row[1])][0] += row[3]/3600
+                    data[(row[name_ind], row[id_ind])] = [0]
+                    data[(row[name_ind], row[id_ind])].append([row[sign_in_time_ind], row[time_today_ind]/3600])
+                    data[(row[name_ind], row[id_ind])][0] += row[time_today_ind]/3600
     return templates.TemplateResponse('adminReports.html', context={"request": request, "data": data})
 
 
 @app.get("/admin/csv", response_class=StreamingResponse)
 async def admin_csv(request: Request):
     data = []
+    id_ind = 0
+    name_ind = 1
     from_date, to_date = calc_date(None, None)
     connection = pymysql.connect(host="localhost",
                                  user=LOCAL_USER,
@@ -192,7 +200,7 @@ async def admin_csv(request: Request):
             data.append([None, None, None, None])
             data.append(["Registered ID", "Registered Name", None, None])
             for i in range(len(registry)):
-                data.append([registry[i][0], registry[i][1], None, None])
+                data.append([registry[i][id_ind], registry[i][name_ind], None, None])
     data_stream = io.StringIO()
     report = csv.writer(data_stream)
     for row in data:
