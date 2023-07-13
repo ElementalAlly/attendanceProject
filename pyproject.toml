@@ -6,7 +6,7 @@ authors = ["Ethan Djajadi <ethan.djajadi@gmail.com>"]
 # readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 requests = "^2.26.0"
 fastapi = "^0.70.0"
 uvicorn = "^0.15.0"
