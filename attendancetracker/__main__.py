@@ -77,6 +77,8 @@ def main():
     with connection:
         while True:
             userID = input("What is your id?\n")
+            if userID == "end_program":
+                return
             with connection.cursor() as cursor:
                 query = f"SELECT * FROM signinsheet WHERE personID = '{userID}' and signInTime = (SELECT max(signInTime) FROM signinsheet WHERE personID='{userID}');"
                 cursor.execute(query)
