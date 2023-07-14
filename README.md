@@ -190,7 +190,8 @@ That should be the set up on the software side!
 
 ## Wiring
 
-To wire this, the LEDs should look like someone like this:
+To wire this, the LEDs should look like something like this:
+
 ![circuit diagram][circuit-diagram]
 
 [circuit-diagram]: https://github.com/ElementalAlly/attendanceProject/raw/master/CircuitDiagram.png
