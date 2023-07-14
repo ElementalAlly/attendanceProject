@@ -186,7 +186,14 @@ shutdown -r now
 
 Then, you should be able to access the host from <hostname>.local.
 
-That should be the set up!
+That should be the set up on the software side!
+
+## Wiring
+
+To wire this, the LEDs should look like someone like this:
+![circuit diagram][circuit-diagram]
+
+[circuit-diagram]: https://github.com/ElementalAlly/attendanceProject/raw/master/CircuitDiagram.png
 
 # Technologies
 
