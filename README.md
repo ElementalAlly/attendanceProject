@@ -118,6 +118,8 @@ ExecStart=
 ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
 ```
 
+Back to the shell, for the other half of the auto script.
+
 ```
 cd ~
 <editor> .profile
