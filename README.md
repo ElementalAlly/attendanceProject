@@ -1,5 +1,5 @@
 # Intro
-This project is an attendance tracker, designed to run on a Raspberry Pi or compatible platform. Using a bar code or QR code reader, users can sign in and out. Users can also access a website interface to view how long they have been signed in for. Admins can
+This project is an attendance tracker, designed to run on a Raspberry Pi or compatible platform. Using a bar code or QR code reader, users can sign in and out. Users can also access a website interface to view how long they have been signed in for. Admins can also view all sign ins and export it to csv to work with the data in a more raw form.
 
 # Materials
  - USB Barcode/QR Code scanner (I used [this one](https://www.amazon.com/dp/B09HK3BD5Y))
