@@ -144,7 +144,6 @@ into the shell. If your hostname is displayed, you are all set!
 ```
 nano /lib/systemd/system/getty@tty1.service.d/20-autologin.conf
 ```
-https://docs.google.com/document/d/1k0Df5FH6akm-81Zu7FDYv9DlAC7-eb6PGO5RTfAWU4o/edit?usp=sharing
 ### 20-autologin.conf
 ```
 [Service]
@@ -155,7 +154,7 @@ ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
 Back to the shell, for the other half of the auto script.
 
 ```
-nano .profile
+nano ~/.profile
 ```
 
 ### .profile (end of file)
@@ -255,6 +254,7 @@ Although you can use a display with this system, it has been designed to not req
 Upon a successful boot, both the red and green LEDs will light up for 1 second, then both turn off. Upon a sign in, the green LED will light up for 1 second. Upon a sign out, the red LED will light up for 1 second.
 
 If you have only connected a barcode scanner to the device, then you can just use that to scan in the ids. On top of that, I have created a qr code you can use to exit the program and shutdown the system cleanly, linked [here][labels]. Simply scan this QR code and the device will cleanly power off.
+
 [labels]: https://docs.google.com/document/d/1k0Df5FH6akm-81Zu7FDYv9DlAC7-eb6PGO5RTfAWU4o/edit?usp=sharing
 
 Finally, let's dive into the website.
@@ -263,32 +263,32 @@ Finally, let's dive into the website.
 
 Upon opening the website, you will be greeted with this home screen:
 
-![home screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/HomePage.png]
+![home screen](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/HomePage.png)
 
 From here, I strongly recommend you register a name with the ID you used to sign in, at the registration page:
 
-![registration screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/RegisterScreen.png]
+![registration screen](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/RegisterScreen.png)
 
 Enter your name, ID, then click the button. This will give you a screen that looks like this:
 
-![registration screen, filled][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/RegisterScreenFilled.png]
+![registration screen, filled](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/RegisterScreenFilled.png)
 
 Next, you can go to reports, to view the report of your attendance through certain times, which looks like this:
 
-![reports screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/ReportScreen.png]
+![reports screen](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/ReportScreen.png)
 
 Once you fill out the fields with your desired information, you can get a report that looks something like this:
 
-![reports screen, filled][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/ReportScreenFilled.png]
+![reports screen, filled](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/ReportScreenFilled.png)
 
 # Admin:
 
 There is one more feature of this device. That is the admin reports. If you need to view all the reports or if you would like to export them in csv, you can. Go to hostname.local/admin to view the admin home screen.
 
-![admin home screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/AdminHome.png]
+![admin home screen](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/AdminHome.png)
 
 Click on "Auto generated reports" to find all of the reports, in the style of the other report generation:
 
-![admin reports screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/AdminReports.png]
+![admin reports screen](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/AdminReports.png)
 
 Click on "Dump to CSV (excel spreadsheets)" to get a dump of the database with all known sign ins and the registry.
