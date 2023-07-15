@@ -208,7 +208,11 @@ If you are using an Orange Pi zero2, this case will work perfectly without modif
 
 The stl files are in this repo, in 3DModels, if you happen to be using an Orange Pi zero2.
 
+### NOTE: The Orange Pi zero2 case was not my work. All of the credit goes to pierloca [here][top-case] and silver-alx [here][bottom-case].
+
 [cad-files]: https://cad.onshape.com/documents/cdb46c01e6ede9460f1eefde/w/d5b10b1233e1596de3d425d7/e/f95f9c48b9db4eb6acbf2c91?renderMode=0&uiState=64b30701daacca2840efeaff
+[top-case]: https://www.thingiverse.com/thing:5394637
+[bottom-case]: https://www.thingiverse.com/thing:5022392
 
 # Usage:
 
@@ -258,3 +262,33 @@ Finally, let's dive into the website.
 # Website:
 
 Upon opening the website, you will be greeted with this home screen:
+
+![home screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/HomePage.png]
+
+From here, I strongly recommend you register a name with the ID you used to sign in, at the registration page:
+
+![registration screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/RegisterScreen.png]
+
+Enter your name, ID, then click the button. This will give you a screen that looks like this:
+
+![registration screen, filled][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/RegisterScreenFilled.png]
+
+Next, you can go to reports, to view the report of your attendance through certain times, which looks like this:
+
+![reports screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/ReportScreen.png]
+
+Once you fill out the fields with your desired information, you can get a report that looks something like this:
+
+![reports screen, filled][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/ReportScreenFilled.png]
+
+# Admin:
+
+There is one more feature of this device. That is the admin reports. If you need to view all the reports or if you would like to export them in csv, you can. Go to hostname.local/admin to view the admin home screen.
+
+![admin home screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/AdminHome.png]
+
+Click on "Auto generated reports" to find all of the reports, in the style of the other report generation:
+
+![admin reports screen][https://github.com/ElementalAlly/attendanceProject/raw/master/docs/AdminReports.png]
+
+Click on "Dump to CSV (excel spreadsheets)" to get a dump of the database with all known sign ins and the registry.
