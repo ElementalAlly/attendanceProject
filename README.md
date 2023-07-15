@@ -1,16 +1,29 @@
 # Intro
-Hello! This project is an attendance designed for a small system-on-a-chip (like a Raspberry Pi). This system uses a database to track the amount of time members of a team have been at meetings.
+This project is an attendance tracker, designed to run on a Raspberry Pi or compatible platform. Using a bar code or QR code reader, users can sign in and out. Users can also access a website interface to view how long they have been signed in for. Admins can
 
 # Materials
-Barcode scanner
-System-on-a-chip (I used an Orange Pi, but Raspberry Pis probably could be used.)
-Access to a 3D printer (convenient for printing a case)
-Internet Connection :)
+ - USB Barcode/QR Code scanner (I used [this one](https://www.amazon.com/dp/B09HK3BD5Y))
+ - Raspberry Pi or compatible system (I used an Orange Pi Zero2 with an Ubuntu Focal image with a 4.9 kernel.)
+ - Access to a 3D printer (convenient for printing a case, I ended up using an Ender 3 Neo)
+ - LEDS (1 red, 1 green)
+ - Cables
+ - Dupont crimper and connectors
+ - Internet Connection :)
+
+# Technologies
+
+In this, I use:
+ - **Python** as my language
+ - **MySQL** as the database
+ - **Pymysql** as the database API for python
+ - **FastAPI** as the website API
+ - **Uvicorn** as the website listener
+ - **Jinja** and **Markdown** as rendering helpers
 
 # Setup (Debian-based Linux Dist)
 We are going to be installing using pip install, then setting up scripts to run this application on startup.
 
-## Steps
+## Installing software needed
 ```
 apt-get install git
 mkdir /app
@@ -26,7 +39,7 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-This will activate a venv, allowing us to use pip.
+This activates the venv we just set up, allowing us to set up the module.
 
 ```
 pip install --upgrade pip
@@ -36,16 +49,21 @@ Without the latest version of pip, pyproject.toml won't work.
 
 ```
 pip install -e .
-git clone https://github.com/rm-hull/OPi.GPIO.git
-pip install -e OPi.GPIO/
 ```
 
 This installs the attendancetracker module, so running the script is easy.
 
-## Now, to set up mysql:
+### If you are using an orangepi
+```
+git clone https://github.com/rm-hull/OPi.GPIO.git
+pip install -e OPi.GPIO/
+```
+
+Since I used an Orange Pi zero2, I used this library to interact with GPIO for the leds.
+
+## Setting up mysql
 
 ```
-deactivate
 apt-get install mysql-server mysql-client
 mysql
 ```
@@ -70,10 +88,10 @@ Finally, we need a .env file for the local mysql user.
 
 ```
 cd attendanceProject/attendancetracker/
-<editor> .env
+nano .env
 ```
 
-### .env file:
+### .env
 ```
 user="root"
 password="<enter password>"
@@ -90,80 +108,18 @@ attendancetracker
 This should bring up an interface where you can enter an ID, and it is "signed in" or 'signed out".
 
 Adjust a few files:
-   /app/attendanceProject/attendancetracker/__main__.py (GPIO)
-   /app/attendanceProject/attendancetracker/static/images/favicon.png (icon on the website)
-   /app/attendanceProject/attendancetracker/app/pages/home.md (name of the team)
+ - /app/attendanceProject/attendancetracker/__main__.py (GPIO library and ports, depending on your specific device)
+ - /app/attendanceProject/attendancetracker/static/images/favicon.png (icon on the website)
+ - /app/attendanceProject/attendancetracker/app/pages/home.md (name of the team)
 
-Test the website
-```
-ifconfig (remember the IP address of the interface you've used, whether that is eth0 for wired connections, or wlan0 for wireless connections.)
-cd attendancetracker
-apt-get install ufw
-uvicorn app.main:app --reload --port 80 --host 0.0.0.0
-```
-
-From another computer on the same network, you should be able to connect to the ip address from a web browser.
-
-## Not Required, but this will start the scripts on boot.
+## Hostname
 
 ```
-cd /lib/systemd/system/getty@tty1.service.d
-<editor> 20-autologin.conf
+nano /etc/hostname
 ```
 
-## 20-autologin.conf
-```
-[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
-```
+### hostname
 
-Back to the shell, for the other half of the auto script.
-
-```
-cd ~
-<editor> .profile
-```
-
-## .profile (end of file)
-```
-sleep 5
-/app/attendanceProject/venv/bin/attendancetracker
-```
-
-Finally, we will be changing rc.local, which runs before sign-in, and with root privileges:
-
-```
-cd /etc/
-<editor> rc.local
-```
-
-## rc.local (end of file)
-```
-cd /app/attendanceProject/attendancetracker
-/app/attendanceProject/venv/bin/uvicorn app.main:app --host 0.0.0.0 --reload --port 80 &
-exit 0
-```
-
-## To test all of this:
-```
-shutdown -r now
-```
-
-After the boot, it should have this:
-
-```
-What is your id?
-
-```
-
-Finally, we can set up the hostname on the device and broadcast it, to make accessing reports and registration easier:
-
-```
-<editor> /etc/hostname
-```
-
-## Hostname:
 ```
 <hostname you want>
 ```
@@ -182,11 +138,59 @@ hostname
 
 into the shell. If your hostname is displayed, you are all set!
 
+
+## Starting scripts on boot:
+
+```
+nano /lib/systemd/system/getty@tty1.service.d/20-autologin.conf
+```
+https://docs.google.com/document/d/1k0Df5FH6akm-81Zu7FDYv9DlAC7-eb6PGO5RTfAWU4o/edit?usp=sharing
+### 20-autologin.conf
+```
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin root --noclear %I $TERM
+```
+
+Back to the shell, for the other half of the auto script.
+
+```
+nano .profile
+```
+
+### .profile (end of file)
+```
+sleep 5
+/app/attendanceProject/venv/bin/attendancetracker
+```
+
+We sleep to let the mysql service start on boot.
+
+Finally, we will be changing rc.local, which runs before sign-in, and with root privileges:
+
+```
+nano /etc/rc.local
+```
+
+### rc.local (end of file)
+```
+cd /app/attendanceProject/attendancetracker
+/app/attendanceProject/venv/bin/uvicorn app.main:app --host 0.0.0.0 --reload --port 80 &
+```
+
+## To test all of this:
 ```
 shutdown -r now
 ```
 
-Then, you should be able to access the host from <hostname>.local.
+After the boot, it should have this:
+
+```
+What is your id?
+
+```
+
+You should also be able to access the host from hostname.local (whatever your hostname is).
 
 That should be the set up on the software side!
 
@@ -196,19 +200,61 @@ To wire this, the LEDs should look like something like this:
 
 ![circuit diagram][circuit-diagram]
 
-[circuit-diagram]: https://github.com/ElementalAlly/attendanceProject/raw/master/CircuitDiagram.png
+[circuit-diagram]: https://github.com/ElementalAlly/attendanceProject/raw/master/docs/CircuitDiagram.png
 
-# Technologies
+## Printing the Case
 
-In this, I use:
- - **MySQL** as the database
- - **Pymysql** as the database API for python
- - **FastAPI** as the website API
- - **Uvicorn** as the website listener
- - **Jinja** and **Markdown** as rendering helpers
+If you are using an Orange Pi zero2, this case will work perfectly without modification. If you used any other model, you will likely need to make modifications to the [cad here][cad-files].
 
-## Scripts:
-Say ~ is wherever attendanceProject is:
+The stl files are in this repo, in 3DModels, if you happen to be using an Orange Pi zero2.
 
-~/attendancetracker/\_\_main\_\_.py (sign in/sign out logic)
-~/attendancetracker/app/main.py (website logic)
+[cad-files]: https://cad.onshape.com/documents/cdb46c01e6ede9460f1eefde/w/d5b10b1233e1596de3d425d7/e/f95f9c48b9db4eb6acbf2c91?renderMode=0&uiState=64b30701daacca2840efeaff
+
+# Usage:
+
+The main script looks like this:
+
+```
+What is your id?
+
+```
+
+To regularly use this, simply type in an id and press enter. Say my ID is 3. The script will look something like this:
+
+```
+What is your id?
+3
+Signed in!
+What is your id?
+```
+
+This indicates that you have signed in, and an entry of a sign in has been put into the database. Upon another entry of the same ID within the same day, the output will look something like this:
+
+```
+What is your id?
+3
+Signed in!
+What is your id?
+3
+Signed out!
+What is your id?
+```
+
+This indicates a successful sign out, and the time between the sign in and sign out times is recorded. Finally, if you want to end the script from running, simply type in "end\_program" when it asks you for an id, and it should exit.
+
+```
+What is your id?
+end_program
+```
+
+Although you can use a display with this system, it has been designed to not require one. If you wired the green and red LEDs up and adjusted the ports and library to fit your device, then you can just use the red and green status LEDs to see what is going on.
+Upon a successful boot, both the red and green LEDs will light up for 1 second, then both turn off. Upon a sign in, the green LED will light up for 1 second. Upon a sign out, the red LED will light up for 1 second.
+
+If you have only connected a barcode scanner to the device, then you can just use that to scan in the ids. On top of that, I have created a qr code you can use to exit the program and shutdown the system cleanly, linked [here][labels]. Simply scan this QR code and the device will cleanly power off.
+[labels]: https://docs.google.com/document/d/1k0Df5FH6akm-81Zu7FDYv9DlAC7-eb6PGO5RTfAWU4o/edit?usp=sharing
+
+Finally, let's dive into the website.
+
+# Website:
+
+Upon opening the website, you will be greeted with this home screen:
