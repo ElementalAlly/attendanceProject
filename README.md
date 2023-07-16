@@ -10,6 +10,7 @@ Tutorial on how to use it available [here](https://youtu.be/DIAiHQ99u1s).
  - LEDs (1 red, 1 green)
  - Cables
  - Dupont crimper and connectors
+ - Soldering equipment
  - Internet Connection :)
 
 # Technologies
@@ -204,6 +205,8 @@ To wire this, the LEDs should look like something like this:
 ![circuit diagram][circuit-diagram]
 
 [circuit-diagram]: https://github.com/ElementalAlly/attendanceProject/raw/master/docs/CircuitDiagram.png
+
+I would recommend using dupont connectors to connect the pins to their endpoints, then soldering the rest of the connections.
 
 ## Printing the Case
 
