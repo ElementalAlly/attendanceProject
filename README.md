@@ -1,5 +1,5 @@
 # Intro
-This project is an attendance tracker, designed to run on a Raspberry Pi or compatible platform. Using a bar code or QR code reader, users can sign in and out. Users can also access a website interface to view how long they have been signed in for. Admins can also view all sign ins and export it to csv to work with the data in a more raw form.
+This project is an attendance tracker, designed to run on a Raspberry Pi or compatible platform. Using a bar code or QR code reader, users can sign in and out. Users can also access a website interface to view how long they have been signed in for. Admins can also view all sign ins and export it to csv to work with the data in a more raw form. Tutorial on how to use it available [here](https://youtu.be/DIAiHQ99u1s).
 
 # Materials
  - USB Barcode/QR Code scanner (I used [this one](https://www.amazon.com/dp/B09HK3BD5Y))
@@ -89,7 +89,7 @@ Finally, we need a .env file for the local mysql user.
 ```
 cd attendanceProject/attendancetracker/
 nano .env
-```
+```https://youtu.be/DIAiHQ99u1s
 
 ### .env
 ```
@@ -165,7 +165,7 @@ sleep 5
 
 We sleep to let the mysql service start on boot.
 
-Finally, we will be changing rc.local, which runs before sign-in, and with root privileges:
+Finally, we will be changing rc.local, which runs before sign-in, and with root privileges:https://youtu.be/DIAiHQ99u1s
 
 ```
 nano /etc/rc.local
@@ -218,7 +218,7 @@ The stl files are in this repo, in 3DModels, if you happen to be using an Orange
 The main script looks like this:
 
 ```
-What is your id?
+What is your id?https://youtu.be/DIAiHQ99u1s
 
 ```
 
