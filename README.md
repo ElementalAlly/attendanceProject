@@ -89,7 +89,6 @@ Finally, we need a .env file for the local mysql user.
 ```
 cd attendanceProject/attendancetracker/
 nano .env
-```https://youtu.be/DIAiHQ99u1s
 
 ### .env
 ```
@@ -165,7 +164,7 @@ sleep 5
 
 We sleep to let the mysql service start on boot.
 
-Finally, we will be changing rc.local, which runs before sign-in, and with root privileges:https://youtu.be/DIAiHQ99u1s
+Finally, we will be changing rc.local, which runs before sign-in, and with root privileges:
 
 ```
 nano /etc/rc.local
@@ -218,7 +217,7 @@ The stl files are in this repo, in 3DModels, if you happen to be using an Orange
 The main script looks like this:
 
 ```
-What is your id?https://youtu.be/DIAiHQ99u1s
+What is your id?
 
 ```
 
