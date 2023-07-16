@@ -89,6 +89,7 @@ Finally, we need a .env file for the local mysql user.
 ```
 cd attendanceProject/attendancetracker/
 nano .env
+```
 
 ### .env
 ```
