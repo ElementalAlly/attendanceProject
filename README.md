@@ -262,7 +262,7 @@ Upon a successful boot, both the red and green LEDs will light up for 1 second, 
 
 If you have only connected a barcode scanner to the device, then you can just use that to scan in the ids. On top of that, I have created a qr code you can use to exit the program and shutdown the system cleanly:
 
-[qr code for "end_program(enter)shutdown now"][qrcode]
+![qr code for "end_program(enter)shutdown now"][qrcode]
 
 Simply scan this QR code and the device will cleanly power off.
 
