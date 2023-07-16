@@ -16,12 +16,13 @@ Tutorial on how to use it available [here](https://youtu.be/DIAiHQ99u1s).
 # Technologies
 
 In this, I use:
- - **Python** as my language
+ - **Python** as my language of choice
  - **MySQL** as the database
  - **Pymysql** as the database API for python
- - **FastAPI** as the website API
+ - **FastAPI** as the website backend
  - **Uvicorn** as the website listener
- - **Jinja** and **Markdown** as rendering helpers
+ - **Jinja** and **Markdown** as text rendering helpers
+ - **Chart.js** as the renderer of the graphs
 
 # Setup (Debian-based Linux Dist)
 We are going to be installing using pip install, then setting up scripts to run this application on startup.
@@ -58,13 +59,13 @@ pip install -e .
 
 This installs the attendancetracker module, so running the script is easy.
 
-### If you are using an orangepi
+### If you are using an Orange Pi
 ```
 git clone https://github.com/rm-hull/OPi.GPIO.git
 pip install -e OPi.GPIO/
 ```
 
-Since I used an Orange Pi zero2, I used this library to interact with GPIO for the LEDs.
+Since I used an Orange Pi Zero2, I used this library to interact with GPIO for the LEDs.
 
 ## Setting up mysql
 
@@ -96,7 +97,7 @@ cd attendanceProject/attendancetracker/
 nano .env
 ```
 
-### .env
+### /app/attendanceProject/attendancetracker/.env
 ```
 user="root"
 password="<enter password>"
@@ -113,7 +114,7 @@ attendancetracker
 This should bring up an interface where you can enter an ID, and it is "signed in" or 'signed out".
 
 Adjust a few files:
- - /app/attendanceProject/attendancetracker/__main__.py (GPIO library and ports, depending on your specific device)
+ - /app/attendanceProject/attendancetracker/\_\_main\_\_.py (GPIO library and ports, depending on your specific device)
  - /app/attendanceProject/attendancetracker/static/images/favicon.png (icon on the website)
  - /app/attendanceProject/attendancetracker/app/pages/home.md (name of the team)
 
@@ -123,7 +124,7 @@ Adjust a few files:
 nano /etc/hostname
 ```
 
-### hostname
+### /etc/hostname
 
 ```
 <hostname you want>
@@ -149,7 +150,7 @@ into the shell. If your hostname is displayed, you have set your hostname correc
 ```
 nano /lib/systemd/system/getty@tty1.service.d/20-autologin.conf
 ```
-### 20-autologin.conf
+### /lib/systemd/system/getty@tty1.service.d/20-autologin.conf
 ```
 [Service]
 ExecStart=
@@ -162,7 +163,7 @@ Back to the shell, for the other half of the auto script.
 nano ~/.profile
 ```
 
-### .profile (end of file)
+### ~/.profile (end of file)
 ```
 sleep 5
 /app/attendanceProject/venv/bin/attendancetracker
@@ -176,7 +177,7 @@ Finally, we will be changing rc.local, which runs before sign-in, and with root 
 nano /etc/rc.local
 ```
 
-### rc.local (end of file)
+### /etc/rc.local (end of file)
 ```
 cd /app/attendanceProject/attendancetracker
 /app/attendanceProject/venv/bin/uvicorn app.main:app --host 0.0.0.0 --reload --port 80 &
@@ -194,7 +195,7 @@ What is your id?
 
 ```
 
-You should also be able to access the host from hostname.local (whatever your hostname is).
+You should also be able to access the website from http://hostname.local/ (whatever your hostname is).
 
 That should be the set up on the software side!
 
@@ -210,11 +211,11 @@ I would recommend using dupont connectors to connect the pins to their endpoints
 
 ## Printing the Case
 
-If you are using an Orange Pi zero2, this case will work perfectly without modification. If you used any other model, you will likely need to make modifications to the [cad here][cad-files].
+If you are using an Orange Pi Zero2, this case will work perfectly without modification. If you used any other model, you will likely need to make modifications to the [cad here][cad-files].
 
-The stl files are in this repo, in 3DModels, if you happen to be using an Orange Pi zero2.
+The stl files are in this repo, in 3DModels, if you happen to be using an Orange Pi Zero2.
 
-### NOTE: The Orange Pi zero2 case was not my work. All of the credit goes to pierloca [here][top-case] and silver-alx [here][bottom-case].
+### NOTE: The Orange Pi Zero2 case was not my work. All of the credit goes to pierloca [here][top-case] and silver-alx [here][bottom-case].
 
 [cad-files]: https://cad.onshape.com/documents/cdb46c01e6ede9460f1eefde/w/d5b10b1233e1596de3d425d7/e/f95f9c48b9db4eb6acbf2c91?renderMode=0&uiState=64b30701daacca2840efeaff
 [top-case]: https://www.thingiverse.com/thing:5394637
@@ -295,11 +296,11 @@ Once you fill out the fields with your desired information, you can get a report
 
 # Admin:
 
-There is one more feature of this device. That is the admin reports. If you need to view all the reports or if you would like to export them in csv, you can. Go to hostname.local/admin to view the admin home screen.
+There is one more feature of this system: the admin reports. If you need to view all the reports or if you would like to export them to a csv file, go to http://hostname.local/admin/ to view the admin home screen.
 
 ![admin home screen](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/AdminHome.png)
 
-Click on "Auto generated reports" to find all of the reports, in the style of the other report generation:
+Click on "Auto generated reports" to find all of the reports, in the style of the single report generation:
 
 ![admin reports screen](https://github.com/ElementalAlly/attendanceProject/raw/master/docs/AdminReports.png)
 
