@@ -1,11 +1,13 @@
 # Intro
-This project is an attendance tracker, designed to run on a Raspberry Pi or compatible platform. Using a bar code or QR code reader, users can sign in and out. Users can also access a website interface to view how long they have been signed in for. Admins can also view all sign ins and export it to csv to work with the data in a more raw form. Tutorial on how to use it available [here](https://youtu.be/DIAiHQ99u1s).
+This project is an attendance tracker, designed to run on a Raspberry Pi or compatible platform. Using a bar code or QR code reader, users can sign in and out. Users can also access a website interface to view how long they have been signed in for. Admins can also view all sign ins and export it to csv to work with the data in a more raw form.
+
+Tutorial on how to use it available [here](https://youtu.be/DIAiHQ99u1s).
 
 # Materials
  - USB Barcode/QR Code scanner (I used [this one](https://www.amazon.com/dp/B09HK3BD5Y))
  - Raspberry Pi or compatible system (I used an Orange Pi Zero2 with an Ubuntu Focal image with a 4.9 kernel.)
  - Access to a 3D printer (convenient for printing a case, I ended up using an Ender 3 Neo)
- - LEDS (1 red, 1 green)
+ - LEDs (1 red, 1 green)
  - Cables
  - Dupont crimper and connectors
  - Internet Connection :)
@@ -23,6 +25,8 @@ In this, I use:
 # Setup (Debian-based Linux Dist)
 We are going to be installing using pip install, then setting up scripts to run this application on startup.
 
+Login as root, then follow the steps here:
+
 ## Installing software needed
 ```
 apt-get install git
@@ -34,7 +38,7 @@ git clone https://github.com/ElementalAlly/attendanceProject.git
 These will set up the files for the install.
 
 ```
-apt-get install python3.10-venv
+apt-get install python3.8-venv
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -59,7 +63,7 @@ git clone https://github.com/rm-hull/OPi.GPIO.git
 pip install -e OPi.GPIO/
 ```
 
-Since I used an Orange Pi zero2, I used this library to interact with GPIO for the leds.
+Since I used an Orange Pi zero2, I used this library to interact with GPIO for the LEDs.
 
 ## Setting up mysql
 
@@ -136,7 +140,7 @@ This is the hostname set up. You can check this by putting:
 hostname
 ```
 
-into the shell. If your hostname is displayed, you are all set!
+into the shell. If your hostname is displayed, you have set your hostname correctly!
 
 
 ## Starting scripts on boot:
@@ -253,9 +257,14 @@ end_program
 Although you can use a display with this system, it has been designed to not require one. If you wired the green and red LEDs up and adjusted the ports and library to fit your device, then you can just use the red and green status LEDs to see what is going on.
 Upon a successful boot, both the red and green LEDs will light up for 1 second, then both turn off. Upon a sign in, the green LED will light up for 1 second. Upon a sign out, the red LED will light up for 1 second.
 
-If you have only connected a barcode scanner to the device, then you can just use that to scan in the ids. On top of that, I have created a qr code you can use to exit the program and shutdown the system cleanly, linked [here][labels]. Simply scan this QR code and the device will cleanly power off.
+If you have only connected a barcode scanner to the device, then you can just use that to scan in the ids. On top of that, I have created a qr code you can use to exit the program and shutdown the system cleanly:
+
+[qr code for "end_program(enter)shutdown now"][qrcode]
+
+Simply scan this QR code and the device will cleanly power off.
 
 [labels]: https://docs.google.com/document/d/1k0Df5FH6akm-81Zu7FDYv9DlAC7-eb6PGO5RTfAWU4o/edit?usp=sharing
+[qrcode]: https://github.com/ElementalAlly/attendanceProject/raw/master/docs/qrCode.png
 
 Finally, let's dive into the website.
 
