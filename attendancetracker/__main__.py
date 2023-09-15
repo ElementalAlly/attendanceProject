@@ -33,6 +33,8 @@ def init():
     GPIO.output(RED_PORT, 1)
     load_dotenv(SCRIPT_DIR/".env")
 
+
+def make_connection():
     localUser = os.getenv("user")
     localPassword = os.getenv("password")
 
@@ -71,14 +73,14 @@ def sign_out(cursor, sign_in_time, delta_time=None):
 
 
 def main():
-    connection = init()
+    init()
     time_today_ind = 2
     sign_in_time_ind = 1
     while True:
         userID = input("What is your id?\n")
         if userID == "end_program":
             return
-        with connection:
+        with make_connection() as connection:
             with connection.cursor() as cursor:
                 query = f"SELECT * FROM signinsheet WHERE personID = '{userID}' and signInTime = (SELECT max(signInTime) FROM signinsheet WHERE personID='{userID}');"
                 cursor.execute(query)
