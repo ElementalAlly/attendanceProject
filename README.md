@@ -101,6 +101,7 @@ nano .env
 ```
 user="root"
 password="<enter password>"
+admin="<enter password>"
 ```
 
 Now, finally, we will test the modules.
