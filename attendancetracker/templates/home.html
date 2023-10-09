@@ -5,10 +5,39 @@
 
 {% block head %}
 {{ super() }}
-
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
 {% endblock %}
 
 {% block page_content %}
+<h1>Today's sign-ins: </h1> <br>
+<h3>Mentors:
+    {% for name in mentors %}
+    {{name}},
+    {% endfor %}
+</h3>
+<pre>     </pre>
+<h3>Date: {{today}}</h3>
+<br>
+<table>
+   <tr>
+      <th>Name</th>
+      <th>ID</th>
+      <th>Sign in time</th>
+      <th>Signed out?</th>
+   </tr>
+   {% for entry in data %}
+   <tr>
+      <td>{{entry[0]}}</td>
+      <td>{{entry[1]}}</td>
+      <td>{{entry[2]}}</td>
+      <td>{{entry[3]}}</td>
+   </tr>
+   {% endfor %}
+</table>
 Click on reports to view reports.
 Click on register to register your id to your name.
 {% endblock %}

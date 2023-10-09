@@ -11,7 +11,7 @@
 {% block page_content %}
 
 {% for key, value in data.items() %}
-<h2>{{key[0]}}'s (id: {{key[1]}}) total hours: {{value[0]}}<h2>
+<h2>{{key[0]}}'s (id: {{key[1]}}, role: {{key[2]}}) total hours: {{value[0]}}<h2>
 <canvas id='{{key[0]}}' style="width:100%;max-width:400px"></canvas>
 <script>
 

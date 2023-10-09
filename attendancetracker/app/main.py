@@ -35,7 +35,45 @@ def calc_date(date1, date2):
 
 @app.get("/", response_class=HTMLResponse)
 def home_get(request: Request):
-    return templates.TemplateResponse("home.html", {"request": request})
+    today = datetime.datetime.now()
+    today = today.strftime("%Y-%m-%d")
+    print(today)
+    name_ind = 0
+    role_ind = 1
+    id_ind = 2
+    sign_in_time_ind = 3
+    time_today_ind = 4
+    data = []
+    mentors = []
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"""SELECT
+            registry.memberName,
+            registry.mentor,
+            signinsheet.personID,
+            signinsheet.signInTime,
+            signinsheet.timeToday
+            FROM
+            signinsheet
+            LEFT JOIN registry USING(personID)
+            WHERE DATE(signInTime) = '{today}'
+            ORDER BY signInTime;"""
+            cursor.execute(query)
+            raw_data = list(cursor.fetchall())
+    for entry in raw_data:
+        if entry[time_today_ind]:
+            signed_out = "yes"
+        else:
+            signed_out = "no"
+        data.append([entry[name_ind], entry[id_ind], entry[sign_in_time_ind].strftime("%H:%M:%S"), signed_out])
+        if entry[role_ind]:
+            mentors.append(entry[name_ind])
+    mentors = list(dict.fromkeys(mentors))
+    return templates.TemplateResponse("home.html", {"request": request, "data": data, "mentors": mentors, "today": today})
 
 
 @app.get("/register", response_class=HTMLResponse)
@@ -147,9 +185,10 @@ async def admin_home(request: Request):
 @app.get("/admin/report", response_class=HTMLResponse)
 async def admin_report(request: Request):
     name_ind = 0
-    id_ind = 1
-    sign_in_time_ind = 2
-    time_today_ind = 3
+    role_id = 1
+    id_ind = 2
+    sign_in_time_ind = 3
+    time_today_ind = 4
     from_date, to_date = calc_date(None, None)
     connection = pymysql.connect(host="localhost",
                                  user=LOCAL_USER,
@@ -160,6 +199,7 @@ async def admin_report(request: Request):
         with connection.cursor() as cursor:
             query = f"""SELECT
             registry.memberName,
+            registry.mentor,
             signinsheet.personID,
             signinsheet.signInTime,
             signinsheet.timeToday
@@ -170,14 +210,17 @@ async def admin_report(request: Request):
             ORDER BY signInTime;"""
             cursor.execute(query)
             for row in cursor:
+                role = "student"
+                if row[role_id]:
+                    role = "mentor"
                 if row[time_today_ind]:
                     try:
-                        data[(row[name_ind], row[id_ind])].append([row[sign_in_time_ind], row[time_today_ind]/3600])
-                        data[(row[name_ind], row[id_ind])][0] += row[time_today_ind]/3600
+                        data[(row[name_ind], row[id_ind], role)].append([row[sign_in_time_ind], row[time_today_ind]/3600])
+                        data[(row[name_ind], row[id_ind], role)][0] += row[time_today_ind]/3600
                     except KeyError:
-                        data[(row[name_ind], row[id_ind])] = [0]
-                        data[(row[name_ind], row[id_ind])].append([row[sign_in_time_ind], row[time_today_ind]/3600])
-                        data[(row[name_ind], row[id_ind])][0] += row[time_today_ind]/3600
+                        data[(row[name_ind], row[id_ind], role)] = [0]
+                        data[(row[name_ind], row[id_ind], role)].append([row[sign_in_time_ind], row[time_today_ind]/3600])
+                        data[(row[name_ind], row[id_ind], role)][0] += row[time_today_ind]/3600
     return templates.TemplateResponse('adminReports.html', context={"request": request, "data": data})
 
 
@@ -187,6 +230,8 @@ async def admin_csv(request: Request):
     total_times = {}
     id_ind = 1
     name_ind = 0
+    role_id = 2
+    sign_in_time_ind = 2
     time_today_ind = 3
     from_date, to_date = calc_date(None, None)
     connection = pymysql.connect(host="localhost",
@@ -195,7 +240,7 @@ async def admin_csv(request: Request):
                                  database="attendancedb")
     with connection:
         with connection.cursor() as cursor:
-            query = "SELECT memberName, personID FROM registry;"
+            query = "SELECT memberName, personID, mentor FROM registry;"
             cursor.execute(query)
             registry = cursor.fetchall()
             for entry in registry:
@@ -211,17 +256,20 @@ async def admin_csv(request: Request):
             WHERE signInTime > '{from_date}' AND signInTime < '{to_date}'
             ORDER BY signInTime;"""
             cursor.execute(query)
-            data = list(cursor.fetchall())
-            for i in range(len(data)):
-                data[i][time_today_ind] /= 60
+            raw_data = list(cursor.fetchall())
+            for i in range(len(raw_data)):
+                data.append((raw_data[i][name_ind], raw_data[i][id_ind], raw_data[i][sign_in_time_ind].strftime("%m/%d/%Y"), raw_data[i][sign_in_time_ind].strftime("%H:%M:%S"), raw_data[i][time_today_ind] / 60))
                 try:
-                    total_times[data[i][id_ind]] += data[i][time_today_ind]
+                    total_times[raw_data[i][id_ind]] += raw_data[i][time_today_ind]
                 except KeyError:
-                    total_times[data[i][id_ind]] = data[i][time_today_ind]
-            data.append([None, None, None, None])
-            data.append(["Registered ID", "Registered Name", "Total Time", None])
+                    total_times[raw_data[i][id_ind]] = raw_data[i][time_today_ind]
+            data.append([None, None, None, None, None])
+            data.append(["Registered ID", "Registered Name", "Total Time", "Role", None])
             for i in range(len(registry)):
-                data.append([registry[i][id_ind], registry[i][name_ind], total_times[registry[i][id_ind]], None])
+                role = "student"
+                if registry[i][role_id]:
+                    role = "mentor"
+                data.append([registry[i][id_ind], registry[i][name_ind], total_times[registry[i][id_ind]], role, None])
     data_stream = io.StringIO()
     report = csv.writer(data_stream)
     for row in data:
