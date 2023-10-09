@@ -34,10 +34,8 @@ def calc_date(date1, date2):
 
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    data = openfile("home.md")
-    data["currentPage"] = "home"
-    return templates.TemplateResponse("page.html", {"request": request, "data": data})
+def home_get(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
 
 
 @app.get("/register", response_class=HTMLResponse)
@@ -46,9 +44,14 @@ def register_get(request: Request):
 
 
 @app.post("/registerPost", response_class=HTMLResponse)
-def register_post(request: Request, name: str = Form(...), user_id: str = Form(...)):
+def register_post(request: Request, name: str = Form(...), user_id: str = Form(...), mentor: bool = Form(False)):
     your_name = name
     your_id = user_id
+    is_mentor = mentor
+    if is_mentor:
+        role = "mentor"
+    else:
+        role = "student"
     if not your_id:
         return templates.TemplateResponse('register.html', context={"request": request, "error": "Please input an ID."})
     connection = pymysql.connect(host="localhost",
@@ -65,10 +68,10 @@ def register_post(request: Request, name: str = Form(...), user_id: str = Form(.
             cursor.execute(query)
             if cursor.fetchone():
                 return templates.TemplateResponse('register.html', context={"request": request, "error": "Name already taken."})
-            query = f"INSERT INTO registry VALUES ('{your_id}', '{your_name}');"
+            query = f"INSERT INTO registry VALUES ('{your_id}', '{your_name}', {is_mentor});"
             cursor.execute(query)
         connection.commit()
-    return templates.TemplateResponse('register.html', context={"request": request, "your_name": your_name, "your_id": your_id})
+    return templates.TemplateResponse('register.html', context={"request": request, "your_name": your_name, "your_id": your_id, "your_role": role})
 
 
 @app.get("/reports", response_class=HTMLResponse)
@@ -80,25 +83,31 @@ def reports_get(request: Request):
 def reports_post(request: Request, identification: str = Form(...), from_date: str = Form(...), to_date: str = Form(...)):
     sign_in_time_ind = 1
     time_today_ind = 0
+    id_ind = 0
+    role_ind = 1
     connection = pymysql.connect(host="localhost",
                                  user=LOCAL_USER,
                                  password=LOCAL_PASSWORD,
                                  database="attendancedb")
     with connection:
         with connection.cursor() as cursor:
-            query = f"SELECT personID FROM registry WHERE memberName = '{identification}'"
+            query = f"SELECT personID, mentor FROM registry WHERE memberName = '{identification}'"
             cursor.execute(query)
-            user_id = cursor.fetchone()
-            if user_id:
-                user_id = user_id[0]
+            entry = cursor.fetchone()
+            if entry:
+                user_id = entry[id_ind]
                 name = identification
+                if entry[role_ind]:
+                    role = "mentor"
+                else:
+                    role = "student"
             else:
                 user_id = identification
                 query = f"SELECT memberName FROM registry WHERE personID = '{user_id}'"
                 cursor.execute(query)
                 name = cursor.fetchone()
                 if name:
-                    name = name[0]
+                    name = name[id_ind]
             if from_date != "0000-00-00":
                 from_date = from_date + " 00:00:00"
             else:
@@ -124,7 +133,7 @@ def reports_post(request: Request, identification: str = Form(...), from_date: s
             all_times.append(entry[time_today_ind]/3600)
             total_time += entry[time_today_ind]/3600
     if name:
-        report = f"Hello {name}, your ID is {user_id} and you've spent {total_time} hours from {from_date[0:10]} to {to_date[0:10]} in robotics this season!"
+        report = f"Hello {name}, your ID is {user_id}, your role is {role}, and you've spent {total_time} hours from {from_date[0:10]} to {to_date[0:10]} in robotics this season!"
     else:
         report = f"Your ID is {user_id} and you've spent {total_time} hours from {from_date[0:10]} to {to_date[0:10]} in robotics this season! (btw, you don't have a name registered to your ID, you may want to visit the register page here :) )"
     return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": all_dates, "timeValues": all_times, "titleValue": f"Report from {from_date[0:10]} to {to_date[0:10]} for {user_id}:"})
@@ -175,8 +184,10 @@ async def admin_report(request: Request):
 @app.get("/admin/csv", response_class=StreamingResponse)
 async def admin_csv(request: Request):
     data = []
-    id_ind = 0
-    name_ind = 1
+    total_times = {}
+    id_ind = 1
+    name_ind = 0
+    time_today_ind = 3
     from_date, to_date = calc_date(None, None)
     connection = pymysql.connect(host="localhost",
                                  user=LOCAL_USER,
@@ -187,6 +198,8 @@ async def admin_csv(request: Request):
             query = "SELECT memberName, personID FROM registry;"
             cursor.execute(query)
             registry = cursor.fetchall()
+            for entry in registry:
+                total_times[entry[id_ind]] = 0
             query = f"""SELECT
             registry.memberName,
             signinsheet.personID,
@@ -199,10 +212,16 @@ async def admin_csv(request: Request):
             ORDER BY signInTime;"""
             cursor.execute(query)
             data = list(cursor.fetchall())
+            for i in range(len(data)):
+                data[i][time_today_ind] /= 60
+                try:
+                    total_times[data[i][id_ind]] += data[i][time_today_ind]
+                except KeyError:
+                    total_times[data[i][id_ind]] = data[i][time_today_ind]
             data.append([None, None, None, None])
-            data.append(["Registered ID", "Registered Name", None, None])
+            data.append(["Registered ID", "Registered Name", "Total Time", None])
             for i in range(len(registry)):
-                data.append([registry[i][id_ind], registry[i][name_ind], None, None])
+                data.append([registry[i][id_ind], registry[i][name_ind], total_times[registry[i][id_ind]], None])
     data_stream = io.StringIO()
     report = csv.writer(data_stream)
     for row in data:

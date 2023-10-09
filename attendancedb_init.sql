@@ -24,16 +24,20 @@ USE `attendancedb`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `signinsheet` (
+  `entryID` int AUTO_INCREMENT NOT NULL,
   `personID` text DEFAULT NULL,
   `signInTime` datetime NOT NULL,
   `timeToday` int DEFAULT NULL,
-   PRIMARY KEY (`signInTime`)
+   PRIMARY KEY (`entryID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+CREATE INDEX idx_signInTime ON signinsheet (signInTime);
 
 CREATE TABLE `registry` (
   `personID` text NOT NULL,
   `memberName` text,
+  `mentor` boolean,
   PRIMARY KEY (`personID`(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 -- Dump completed on 2023-06-24 17:07:06

@@ -43,6 +43,7 @@ def make_connection():
                                  password=localPassword,
                                  database="attendancedb")
 
+    print("Connected!")
     return connection
 
 
@@ -74,15 +75,15 @@ def sign_out(cursor, sign_in_time, delta_time=None):
 
 def main():
     init()
-    time_today_ind = 2
-    sign_in_time_ind = 1
+    time_today_ind = 1
+    sign_in_time_ind = 0
     while True:
         userID = input("What is your id?\n")
         if userID == "end_program":
             return
         with make_connection() as connection:
             with connection.cursor() as cursor:
-                query = f"SELECT * FROM signinsheet WHERE personID = '{userID}' and signInTime = (SELECT max(signInTime) FROM signinsheet WHERE personID='{userID}');"
+                query = f"SELECT signInTime, timeToday FROM signinsheet WHERE personID = '{userID}' and signInTime = (SELECT max(signInTime) FROM signinsheet WHERE personID='{userID}');"
                 cursor.execute(query)
                 most_recent_entry = cursor.fetchone()
                 if most_recent_entry and not most_recent_entry[time_today_ind]:

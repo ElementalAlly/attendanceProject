@@ -11,7 +11,7 @@
 
 {% block page_content %}
 {% if your_name %}
-<h2> Hello {{your_name}}, your ID has been registered as {{your_id}}.</h2>
+<h2> Hello {{your_name}}, your ID has been registered as {{your_id}}. Your role is {{your_role}}.</h2>
 {% endif %}
 <h1 class="cap">Register</h1>
 
@@ -21,6 +21,8 @@
    <input type="text" id="name" name="name" value=""> <br>
    <label for="user_id">ID: </label>
    <input type="text" id="user_id" name="user_id" value=""> <br>
+   <label for="mentor">Are you a mentor? </label>
+   <input type="checkbox" id="mentor" name="mentor" value="True"> <br>
    <input type="submit" value="Register my name!">
 </form>
 
