@@ -1,9 +1,10 @@
 import os
-from fastapi import FastAPI, Request, Form
+from fastapi import Cookie, FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from .library.helpers import openfile
+from typing import Annotated
 import pymysql.cursors
 import datetime
 import csv
@@ -14,6 +15,7 @@ load_dotenv()
 
 LOCAL_USER = os.getenv("user")
 LOCAL_PASSWORD = os.getenv("password")
+ADMIN_PASSWORD = os.getenv("admin")
 
 app = FastAPI()
 
@@ -177,13 +179,30 @@ def reports_post(request: Request, identification: str = Form(...), from_date: s
     return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": all_dates, "timeValues": all_times, "titleValue": f"Report from {from_date[0:10]} to {to_date[0:10]} for {user_id}:"})
 
 
+def _check_admin_credential(credentials):
+    return credentials == ADMIN_PASSWORD
+
+
+@app.post("/adminLogin", response_class=HTMLResponse)
+def admin_login(request: Request, password: str = Form(...)):
+    response = templates.TemplateResponse('adminRedirect.html', context={"request": request})
+    response.set_cookie(key="admin", value=password)
+    return response
+
+
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_home(request: Request):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
     return templates.TemplateResponse('adminHome.html', context={"request": request})
 
 
 @app.get("/admin/report", response_class=HTMLResponse)
 async def admin_report(request: Request):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
     name_ind = 0
     role_id = 1
     id_ind = 2
@@ -226,6 +245,9 @@ async def admin_report(request: Request):
 
 @app.get("/admin/csv", response_class=StreamingResponse)
 async def admin_csv(request: Request):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
     data = []
     total_times = {}
     id_ind = 1
