@@ -39,7 +39,6 @@ def calc_date(date1, date2):
 def home_get(request: Request):
     today = datetime.datetime.now()
     today = today.strftime("%Y-%m-%d")
-    print(today)
     name_ind = 0
     role_ind = 1
     id_ind = 2
@@ -299,3 +298,54 @@ async def admin_csv(request: Request):
     response = StreamingResponse(iter([data_stream.getvalue()]), media_type="text/csv")
     response.headers["Content-Disposition"] = f"attachment; filename={from_date[0:4]}-{int(from_date[0:4]) + 1}SeasonalAttendanceReport.csv"
     return response
+
+
+@app.get("/admin/signInSheet", response_class=HTMLResponse)
+def admin_sign_in_get(request: Request):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+    return templates.TemplateResponse('adminSignInSheet.html', context={"request": request})
+
+
+@app.post("/admin/signInPost", response_class=HTMLResponse)
+def admin_sign_in_post(request: Request, date: str = Form(...)):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+    name_ind = 0
+    role_ind = 1
+    id_ind = 2
+    sign_in_time_ind = 3
+    time_today_ind = 4
+    data = []
+    mentors = []
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"""SELECT
+            registry.memberName,
+            registry.mentor,
+            signinsheet.personID,
+            signinsheet.signInTime,
+            signinsheet.timeToday
+            FROM
+            signinsheet
+            LEFT JOIN registry USING(personID)
+            WHERE DATE(signInTime) = '{date}'
+            ORDER BY signInTime;"""
+            cursor.execute(query)
+            raw_data = list(cursor.fetchall())
+    for entry in raw_data:
+        if entry[time_today_ind]:
+            signed_out = "yes"
+        else:
+            signed_out = "no"
+        data.append([entry[name_ind], entry[id_ind], entry[sign_in_time_ind].strftime("%H:%M:%S"), signed_out])
+        if entry[role_ind]:
+            mentors.append(entry[name_ind])
+    mentors = list(dict.fromkeys(mentors))
+    return templates.TemplateResponse("adminSignInSheet.html", {"request": request, "data": data, "mentors": mentors, "given_date": date})

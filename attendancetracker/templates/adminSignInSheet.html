@@ -1,7 +1,6 @@
 {% extends "base.html" %}
-{% set active_page = "home" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Day Sign In Sheets{% endblock %}
 
 {% block head %}
 {{ super() }}
@@ -13,14 +12,21 @@ table, th, td {
 {% endblock %}
 
 {% block page_content %}
-<h1>Today's sign-ins: </h1> <br>
+
+<h1>Input the date below to view the sign in sheet for that day. </h1>
+<form action="/admin/signInPost" method="post">
+   <label for="date">Date you would like to view (yyyy-mm-dd): </label>
+   <input type="text" id="date" name="date" value=""> <br>
+   <input type="submit" value="View sheet">
+</form>
+
+{% if given_date %}
+<h1>Sign-ins for {{given_date}}: </h1> <br>
 <h3>Mentors:
-   {% for name in mentors %}
-   {{name}},
-   {% endfor %}
-Date: {{today}}
+    {% for name in mentors %}
+    {{name}},
+    {% endfor %}
 </h3>
-<br>
 <table>
    <tr>
       <th>Name</th>
@@ -37,8 +43,7 @@ Date: {{today}}
    </tr>
    {% endfor %}
 </table>
-Click on reports to view reports.
-Click on register to register your id to your name.
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
