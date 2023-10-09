@@ -4,11 +4,14 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from .library.helpers import openfile
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from typing import Annotated
 import pymysql.cursors
 import datetime
 import csv
 import io
+import pathlib
+import qrcode
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -176,6 +179,38 @@ def reports_post(request: Request, identification: str = Form(...), from_date: s
     else:
         report = f"Your ID is {user_id} and you've spent {total_time} hours from {from_date[0:10]} to {to_date[0:10]} in robotics this season! (btw, you don't have a name registered to your ID, you may want to visit the register page here :) )"
     return templates.TemplateResponse('reports.html', context={"request": request, "report": report, "dateValues": all_dates, "timeValues": all_times, "titleValue": f"Report from {from_date[0:10]} to {to_date[0:10]} for {user_id}:"})
+
+
+@app.get("/qr", response_class=HTMLResponse)
+def make_qr(request: Request):
+    return templates.TemplateResponse("qr.html", {"request": request})
+
+
+@app.post("/qrPost", response_class=StreamingResponse)
+def make_qr(request: Request, qrtext: str = Form(...)):
+    # This is modified from https://www.geeksforgeeks.org/how-to-generate-qr-codes-with-a-custom-logo-using-python/
+    logo_path = pathlib.Path(__file__).parent / "logo.jpg"
+    logo = Image.open(str(logo_path))
+
+    basewidth = 80
+    wpercent = (basewidth/float(logo.size[0]))
+    hsize = int((float(logo.size[1])*float(wpercent)))
+    logo = logo.resize((basewidth, hsize), Image.LANCZOS)
+    qr = qrcode.QRCode(
+        error_correction=qrcode.constants.ERROR_CORRECT_H
+    )
+    qr.add_data(qrtext)
+    qr.make()
+    qr_img = qr.make_image().convert('RGB')
+    pos = ((qr_img.size[0] - logo.size[0]) // 2, (qr_img.size[1] - logo.size[1]) // 2)
+    qr_img.paste(logo, pos)
+
+    data_stream = io.BytesIO()
+    qr_img.save(data_stream, format="JPEG")
+
+    response = StreamingResponse(iter([data_stream.getvalue()]), media_type="image/jpeg")
+    response.headers["Content-Disposition"] = "attachment; filename=qrcode.jpg"
+    return response
 
 
 def _check_admin_credential(credentials):

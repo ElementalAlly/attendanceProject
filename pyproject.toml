@@ -16,6 +16,8 @@ python-multipart = "^0.0.5"
 jinja2 = "^3.0.2"
 Markdown = "^3.3.4"
 pymysql = "^1.0.3"
+pillow = "^10.0"
+qrcode = "^7.4"
 
 [tool.poetry.scripts]
 attendancetracker = "attendancetracker.__main__:main"

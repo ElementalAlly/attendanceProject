@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set active_page = "qr" %}
+
+{% block title %}Make-QR{% endblock %}
+
+{% block head %}
+{{ super() }}
+
+
+{% endblock %}
+
+{% block page_content %}
+
+<h1 class="cap">Make-QR</h1>
+
+<h3>Enter the text to be embedded in QR code:</h3>
+<form action="/qrPost" method="post">
+   <input type="text" id="qrtext" name="qrtext" value=""> <br>
+   <input type="submit" value="Make QR code!">
+</form>
+
+{{error}}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+
+{% endblock %}
