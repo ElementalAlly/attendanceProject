@@ -5,7 +5,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from .library.helpers import openfile
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-from typing import Annotated
 import pymysql.cursors
 import datetime
 import csv
