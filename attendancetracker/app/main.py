@@ -383,3 +383,81 @@ def admin_sign_in_post(request: Request, date: str = Form(...)):
             mentors.append(entry[name_ind])
     mentors = list(dict.fromkeys(mentors))
     return templates.TemplateResponse("adminSignInSheet.html", {"request": request, "data": data, "mentors": mentors, "given_date": date})
+
+
+def _edit_users_page(request, connection):
+    with connection.cursor() as cursor:
+        query = "SELECT * FROM registry;"
+        cursor.execute(query)
+        users = list(cursor.fetchall())
+    return templates.TemplateResponse('adminEditUsers.html', context={"request": request, "users": users})
+
+
+@app.get("/admin/editUsers", response_class=HTMLResponse)
+def admin_edit_users(request: Request):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        return _edit_users_page(request, connection)
+
+
+@app.post("/admin/editUsersEditPost", response_class=HTMLResponse)
+def admin_edit_users_edit_post(request: Request, user_id: str = Form(...), name: str = Form(...), mentor: bool = Form(False)):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"""UPDATE registry
+            SET memberName = '{name}', mentor = {mentor}
+            WHERE personID = '{user_id}';"""
+            cursor.execute(query)
+        connection.commit()
+        return _edit_users_page(request, connection)
+
+
+@app.post("/admin/editUsersDeletePost", response_class=HTMLResponse)
+def admin_edit_users_delete_post(request: Request, user_id: str = Form(...)):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"DELETE FROM registry WHERE personID = '{user_id}';"
+            cursor.execute(query)
+        connection.commit()
+        return _edit_users_page(request, connection)
+
+
+@app.post("/admin/editUsersAddPost", response_class=HTMLResponse)
+def admin_edit_users_add_post(request: Request, user_id: str = Form(...), name: str = Form(...), mentor: bool = Form(False)):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"INSERT INTO registry VALUES ('{user_id}', '{name}', {mentor});"
+            cursor.execute(query)
+        connection.commit()
+        return _edit_users_page(request, connection)

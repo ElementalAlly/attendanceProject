@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Reports{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+{% endblock %}
+
+{% block page_content %}
+
+<h1>Edit Users</h1>
+
+<table>
+   <tr>
+      <th>#</th>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Mentor?</th>
+   </tr>
+   {% for user in users %}
+   <tr>
+      <form action="/admin/editUsersEditPost" method="post">
+         <td>{{loop.index}}</td>
+         <td>{{user[0]}}<input type="hidden" id="user_id" name="user_id" value="{{user[0]}}"></td>
+         <td><input type="text" id="name" name="name" value="{{user[1]}}"></td>
+         <td><input type="checkbox" id="mentor" name="mentor" value="True" {{"checked" if user[2] else ""}}> </td>
+         <td><input type="submit" name="action" value="Save"></td>
+      </form>
+      <form action="/admin/editUsersDeletePost" method="post">
+         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" id="user_id" name="user_id" value="{{user[0]}}"> <input type="submit" name="action" value="Delete" onclick="return confirm('Are you sure?')"></td>
+      </form>
+   </tr>
+   {% endfor %}
+   <tr>
+      <form action="/admin/editUsersAddPost" method="post">
+         <td></td>
+         <td><input type="text" id="user_id" name="user_id" value=""></td>
+         <td><input type="text" id="name" name="name" value=""></td>
+         <td><input type="checkbox" id="mentor" name="mentor" value="True"> </td>
+         <td><input type="submit" name="action" value="Add"></td>
+      </form>
+   </tr>
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+
+{% endblock %}
