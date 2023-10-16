@@ -28,10 +28,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def calc_date(date1, date2):
     now = datetime.datetime.now()
     if not date1:
-        if now.month < 6:
-            date1 = f"{now.year-1}-06-01 00:00:00"
+        if now.month < 9:
+            date1 = f"{now.year-1}-09-01 00:00:00"
         else:
-            date1 = f"{now.year}-06-01 00:00:00"
+            date1 = f"{now.year}-09-01 00:00:00"
     if not date2:
         date2 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return (date1, date2)
