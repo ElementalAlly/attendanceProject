@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Edit Sign in Sheet{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+table, th, td {
+  border: 1px solid black;
+}
+</style>
+{% endblock %}
+
+{% block page_content %}
+
+<h1>Edit Sign in Sheet for {{date}}</h1>
+
+<table>
+   <tr>
+      <th>#</th>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Mentor?</th>
+      <th>Sign-in</th>
+      <th>Minutes</th>
+   </tr>
+   {% for entry in data %}
+   <tr>
+      <form action="/admin/editSignInSheetEditPost" method="post">
+         <td>{{loop.index}}
+             <input type="hidden" id="date" name="date" value="{{date}}">
+             <input type="hidden" id="entry_id" name="entry_id" value="{{entry[2]}}">
+         </td>
+         <td>{{entry[3]}}<input type="hidden" id="person_id" name="person_id" value="{{entry[2]}}"></td>
+         <td>{{entry[0]}}</td>
+         <td>{{"mentor" if entry[1] else "student"}}</td>
+         <td><input type="text" id="time" name="time" value="{{entry[4]}}"></td>
+         <td><input type="text" id="minutes" name="minutes" value={{entry[5]}}> </td>
+         <td><input type="submit" name="action" value="Save"></td>
+      </form>
+      <form action="/admin/editSignInSheetDeletePost" method="post">
+         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="hidden" id="date" name="date" value="{{date}}">
+            <input type="hidden" id="entry_id" name="entry_id" value="{{entry[2]}}">
+            <input type="submit" name="action" value="Delete" onclick="return confirm('Are you sure?')">
+         </td>
+      </form>
+   </tr>
+   {% endfor %}
+   <tr>
+      <form action="/admin/editSignInSheetAddPost" method="post">
+         <td><input type="hidden" id="date" name="date" value="{{date}}"></td>
+         <td><input type="text" id="person_id" name="person_id" value=""></td>
+         <td></td>
+         <td></td>
+         <td><input type="text" id="time" name="time" value=""></td>
+         <td><input type="text" id="minutes" name="minutes" value=""> </td>
+         <td><input type="submit" name="action" value="Add"></td>
+      </form>
+   </tr>
+</table>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+
+
+{% endblock %}

@@ -461,3 +461,114 @@ def admin_edit_users_add_post(request: Request, user_id: str = Form(...), name: 
             cursor.execute(query)
         connection.commit()
         return _edit_users_page(request, connection)
+
+
+@app.get("/admin/editSignIn", response_class=HTMLResponse)
+def admin_edit_sign_in(request: Request):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    return templates.TemplateResponse("adminEditSignIn.html", context={"request": request})
+
+
+def _edit_sign_in_sheet(request, connection, date):
+    sign_in_time_ind = 4
+    time_today_ind = 5
+    the_date = datetime.datetime.strptime(date, "%Y-%m-%d")
+    data = []
+    with connection.cursor() as cursor:
+        query = f"""SELECT
+        registry.memberName,
+        registry.mentor,
+        signinsheet.entryID,
+        signinsheet.personID,
+        signinsheet.signInTime,
+        signinsheet.timeToday
+        FROM
+        signinsheet
+        LEFT JOIN registry USING(personID)
+        WHERE DATE(signInTime) = '{the_date}'
+        ORDER BY signInTime;"""
+        cursor.execute(query)
+        raw_data = list(cursor.fetchall())
+    for row in raw_data:
+        entry = list(row)
+        entry[sign_in_time_ind] = row[sign_in_time_ind].strftime("%H:%M:%S")
+        entry[time_today_ind] = round(row[time_today_ind] / 60, 2)
+        data.append(entry)
+    return templates.TemplateResponse('adminEditSignInSheet.html', context={"request": request, "date": date, "data": data})
+
+
+@app.post("/admin/editSignInSheet", response_class=HTMLResponse)
+def admin_edit_sign_in_sheet(request: Request, date: str = Form(...)):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        return _edit_sign_in_sheet(request, connection, date)
+
+
+@app.post("/admin/editSignInSheetEditPost", response_class=HTMLResponse)
+def admin_edit_sign_in_sheet_edit_post(request: Request, date: str = Form(...), entry_id: str = Form(...), time: str = Form(...), minutes: str = Form(...)):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    timestamp = datetime.datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
+    seconds = int(float(minutes) * 60)
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"""UPDATE signinsheet
+            SET signInTime = '{timestamp}', timeToday = {seconds}
+            WHERE entryID = '{entry_id}';"""
+            cursor.execute(query)
+        connection.commit()
+        return _edit_sign_in_sheet(request, connection, date)
+
+
+@app.post("/admin/editSignInSheetDeletePost", response_class=HTMLResponse)
+def admin_edit_sign_in_sheet_delete_post(request: Request, date: str = Form(...), entry_id: str = Form(...)):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"DELETE FROM signinsheet WHERE entryID = '{entry_id}';"
+            cursor.execute(query)
+        connection.commit()
+        return _edit_sign_in_sheet(request, connection, date)
+
+
+@app.post("/admin/editSignInSheetAddPost", response_class=HTMLResponse)
+def admin_edit_sign_in_sheet_add_post(request: Request, date: str = Form(...), person_id: str = Form(...), time: str = Form(...), minutes: str = Form(...)):
+    creds = request.cookies.get("admin")
+    if not _check_admin_credential(creds):
+        return templates.TemplateResponse("adminLogin.html", context={"request": request})
+
+    timestamp = datetime.datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
+    seconds = int(float(minutes) * 60)
+    connection = pymysql.connect(host="localhost",
+                                 user=LOCAL_USER,
+                                 password=LOCAL_PASSWORD,
+                                 database="attendancedb")
+    with connection:
+        with connection.cursor() as cursor:
+            query = f"INSERT INTO signinsheet (personID, signInTime, timeToday) VALUES ('{person_id}', '{timestamp}', '{seconds}')"
+            cursor.execute(query)
+        connection.commit()
+        return _edit_sign_in_sheet(request, connection, date)
