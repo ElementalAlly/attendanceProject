@@ -495,7 +495,10 @@ def _edit_sign_in_sheet(request, connection, date):
     for row in raw_data:
         entry = list(row)
         entry[sign_in_time_ind] = row[sign_in_time_ind].strftime("%H:%M:%S")
-        entry[time_today_ind] = round(row[time_today_ind] / 60, 2)
+        if row[time_today_ind]:
+            entry[time_today_ind] = round(row[time_today_ind] / 60, 2)
+        else:
+            entry[time_today_ind] = 0
         data.append(entry)
     return templates.TemplateResponse('adminEditSignInSheet.html', context={"request": request, "date": date, "data": data})
 
@@ -521,7 +524,10 @@ def admin_edit_sign_in_sheet_edit_post(request: Request, date: str = Form(...), 
         return templates.TemplateResponse("adminLogin.html", context={"request": request})
 
     timestamp = datetime.datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M:%S")
-    seconds = int(float(minutes) * 60)
+    if minutes == 0:
+        seconds = None
+    else:
+        seconds = int(float(minutes) * 60)
     connection = pymysql.connect(host="localhost",
                                  user=LOCAL_USER,
                                  password=LOCAL_PASSWORD,
