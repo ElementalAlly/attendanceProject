@@ -326,18 +326,22 @@ async def admin_csv(request: Request):
             cursor.execute(query)
             raw_data = list(cursor.fetchall())
             for i in range(len(raw_data)):
-                data.append((raw_data[i][name_ind], raw_data[i][id_ind], raw_data[i][sign_in_time_ind].strftime("%m/%d/%Y"), raw_data[i][sign_in_time_ind].strftime("%H:%M:%S"), raw_data[i][time_today_ind] / 60))
-                try:
-                    total_times[raw_data[i][id_ind]] += raw_data[i][time_today_ind]
-                except KeyError:
-                    total_times[raw_data[i][id_ind]] = raw_data[i][time_today_ind]
-            data.append([None, None, None, None, None])
-            data.append(["Registered ID", "Registered Name", "Total Time", "Role", None])
+                if raw_data[i][time_today_ind]:
+                    total_times[raw_data[i][id_ind]] = total_times.setdefault(raw_data[i][id_ind], 0) + raw_data[i][time_today_ind]
+            data.append(["SUMMARY", None, None, None, None])
+            data.append(["Registered ID", "Registered Name", "Total Hours", "Role", None])
             for i in range(len(registry)):
                 role = "student"
                 if registry[i][role_id]:
                     role = "mentor"
-                data.append([registry[i][id_ind], registry[i][name_ind], total_times[registry[i][id_ind]], role, None])
+                data.append([registry[i][id_ind], registry[i][name_ind], round(total_times.get(registry[i][id_ind], 0) / 3600, 2), role, None])
+            data.append([None, None, None, None, None])
+            data.append(["RAW DATA", None, None, None, None])
+            data.append(["Registered ID", "Registered Name", "Sign In Date", "Sign In Time", "Total Minutes"])
+            for i in range(len(raw_data)):
+                if raw_data[i][time_today_ind]:
+                    data.append((raw_data[i][id_ind], raw_data[i][name_ind], raw_data[i][sign_in_time_ind].strftime("%m/%d/%Y"), raw_data[i][sign_in_time_ind].strftime("%H:%M:%S"), round(raw_data[i][time_today_ind] / 60, 2)))
+
     data_stream = io.StringIO()
     report = csv.writer(data_stream)
     for row in data:
