@@ -1,6 +1,6 @@
 import os
 from fastapi import Cookie, FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from .library.helpers import openfile
@@ -23,6 +23,19 @@ app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.exception_handler(Exception)
+async def debug_exception_handler(request: Request, exc: Exception):
+    import traceback
+
+    return Response(
+        content="".join(
+            traceback.format_exception(
+                etype=type(exc), value=exc, tb=exc.__traceback__
+            )
+        )
+    )
 
 
 def calc_date(date1, date2):
