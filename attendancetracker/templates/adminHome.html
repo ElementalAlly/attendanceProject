@@ -9,21 +9,37 @@
 
 {% block page_content %}
 
-<a href="/admin/report">
-   <input type="button" value="Auto generated reports" />
-</a>
-<a href="/admin/csv">
-   <input type="button" value="Dump to CSV (excel spreadsheets)" />
-</a>
-<a href="/admin/signInSheet">
-   <input type="button" value="Day sign in sheet">
-</a>
-<a href="/admin/editUsers">
-   <input type="button" value="Edit users">
-</a>
-<a href="/admin/editSignIn">
-   <input type="button" value="Edit sign in">
-</a>
+<h1>
+   Admin Operations:
+</h1>
+
+<ul>
+   <li>
+      <a href="/admin/report">
+         Auto generated reports
+      </a>
+   </li>
+   <li>
+      <a href="/admin/csv">
+         Dump to CSV (excel spreadsheets)
+      </a>
+   </li>
+   <li>
+      <a href="/admin/signInSheet">
+         Day sign in sheet
+      </a>
+   </li>
+   <li>
+      <a href="/admin/editUsers">
+         Edit users
+      </a>
+   </li>
+   <li>
+      <a href="/admin/editSignIn">
+         Edit sign in
+      </a>
+   </li>
+</ul>
 
 {% endblock %}
 
