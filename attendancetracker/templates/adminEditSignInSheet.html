@@ -50,9 +50,9 @@ table, th, td {
    <tr>
       <form action="/admin/editSignInSheetAddPost" method="post">
          <td><input type="hidden" id="date" name="date" value="{{date}}"></td>
-         <td id="student_id"></td>
+         <td id="person_id_label"></td>
          <td>
-            <select name="studentName" id="studentName">
+            <select name="person_id" id="personName">
                <option value="" selected="selected">Select person</option>
             </select>
          </td>
@@ -65,8 +65,8 @@ table, th, td {
          var names = [{% for index in range(registry | length) %}{{", " if index != 0}}"{{registry[index][1]}}"{% endfor %}]
          var IDs = [{% for index in range(registry | length) %}{{", " if index != 0}}"{{registry[index][0]}}"{% endfor %}]
          window.onload = function() {
-            var name_sel = document.getElementById("studentName");
-            var id_label = document.getElementById("student_id");
+            var name_sel = document.getElementById("personName");
+            var id_label = document.getElementById("person_id_label");
             for (var i = 0; i < names.length; i++) {
                name_sel.options[name_sel.options.length] = new Option(names[i], IDs[i]);
             }
