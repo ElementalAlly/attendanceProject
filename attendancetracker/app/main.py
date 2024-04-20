@@ -517,7 +517,11 @@ def _edit_sign_in_sheet(request, connection, date):
         else:
             entry[time_today_ind] = 0
         data.append(entry)
-    return templates.TemplateResponse('adminEditSignInSheet.html', context={"request": request, "date": date, "data": data})
+    with connection.cursor() as cursor:
+        query = "SELECT personID, memberName FROM registry"
+        cursor.execute(query)
+        registry_names = list(cursor.fetchall())
+    return templates.TemplateResponse('adminEditSignInSheet.html', context={"request": request, "date": date, "data": data, "registry": registry_names})
 
 
 @app.post("/admin/editSignInSheet", response_class=HTMLResponse)

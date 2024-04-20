@@ -50,13 +50,31 @@ table, th, td {
    <tr>
       <form action="/admin/editSignInSheetAddPost" method="post">
          <td><input type="hidden" id="date" name="date" value="{{date}}"></td>
-         <td><input type="text" id="person_id" name="person_id" value=""></td>
-         <td></td>
+         <td id="student_id"></td>
+         <td>
+            <select name="studentName" id="studentName">
+               <option value="" selected="selected">Select person</option>
+            </select>
+         </td>
          <td></td>
          <td><input type="text" id="time" name="time" value=""></td>
          <td><input type="text" id="minutes" name="minutes" value=""> </td>
          <td><input type="submit" name="action" value="Add"></td>
       </form>
+      <script>
+         var names = [{% for index in range(registry | length) %}{{", " if index != 0}}"{{registry[index][1]}}"{% endfor %}]
+         var IDs = [{% for index in range(registry | length) %}{{", " if index != 0}}"{{registry[index][0]}}"{% endfor %}]
+         window.onload = function() {
+            var name_sel = document.getElementById("studentName");
+            var id_label = document.getElementById("student_id");
+            for (var i = 0; i < names.length; i++) {
+               name_sel.options[name_sel.options.length] = new Option(names[i], IDs[i]);
+            }
+            name_sel.onchange = function() {
+               id_label.innerText = name_sel.value;
+            }
+         }
+      </script>
    </tr>
 </table>
 
