@@ -23,6 +23,7 @@ In this, I use:
  - **Uvicorn** as the website listener
  - **Jinja** and **Markdown** as text rendering helpers
  - **Chart.js** as the renderer of the graphs
+ - **Cron** to backup the project
 
 # Setup (Debian-based Linux Dist)
 We are going to be installing using pip install, then setting up scripts to run this application on startup.
@@ -145,6 +146,54 @@ hostname
 
 into the shell. If your hostname is displayed, you have set your hostname correctly!
 
+## Backing up the database
+
+We will be using a private github repository to backup the repository. To set this up:
+
+ - Find or make a github account to hold the backup.
+ - Create a private repo
+ - Create a fine-tuned personal access token and copy it down
+ - Give the token permissions to the private repo: commit statuses, contents, merge queues, pull requests, all read and write
+ - On your orangepi, change directory to /app/ and use the following command: `git clone https://<token here>@github.com/<github username here>/<repo name>.git`
+ - cd into the repository, and run these commands:
+
+```
+touch backupdb.sql
+git add .
+git commit -m "initial commit"
+git push
+```
+
+Now, you can test the backup by running:
+
+```
+cd /app/attendanceProject/
+/bin/sh ./backupdb.sh <your repo name> <your mysql password>
+```
+
+This should update the backup in the repository.
+
+## Automatically backing up the database
+
+To automatically back up the database, we will be using cron to run the update script daily.
+
+Run the following:
+
+```
+sudo apt update && sudo apt install cron
+sudo systemctl enable cron
+crontab -e
+```
+
+This should bring you into an editor selection. Select the editor you are most comfortable with, or nano for ease.
+
+At the end of the comments, add this entry to the cron table:
+
+```
+0 23  * * * /bin/sh /app/attendanceProject/backupdb.sh <your repo name> <your mysql password>
+```
+
+This will backup the database once per day.
 
 ## Starting scripts on boot:
 
@@ -199,6 +248,18 @@ What is your id?
 You should also be able to access the website from http://hostname.local/ (whatever your hostname is).
 
 That should be the set up on the software side!
+
+## Restoring from backup
+
+If the system ever corrupts or breaks, follow the setup guide above with a few modifications:
+
+In the section "Backing up the database", after cloning the repository, don't try to create an initial commit. Instead, run the following command:
+
+```
+mysql < /app/<repo name>/backupdb.sql -u root -p <mysql password>
+```
+
+This should have restored the last backup the system had of the database. Complete the setup from there as normal.
 
 ## Wiring
 
