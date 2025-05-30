@@ -370,19 +370,13 @@ Click on "Dump to CSV (excel spreadsheets)" to get a dump of the database with a
 
 # Generate QR Code IDs
 
-Install python on a laptop or workstation with access to a printer, at least version 3.11.0.
-
-Open terminal or command prompt, and clone this repository: `git clone https://github.com/ElementalAlly/attendanceBackups.git`
-
-cd into the make-id folder in the repository.
-
-Decide what prefix you would want on your ids.
-
-Replace attendanceProject/app/logo.jpg with your own logo.jpg.
-
-Decide what id number range you want, for how many people you expect to make new ids for.
-
-Run this command:
+ - Install python on a laptop or workstation with access to a printer, at least version 3.11.0.
+ - Open terminal or command prompt, and clone this repository: `git clone https://github.com/ElementalAlly/attendanceBackups.git`
+ - cd into the make-id folder in the repository.
+ - Decide what prefix you would want on your ids.
+ - Replace attendanceProject/app/logo.jpg with your own logo.jpg.
+ - Decide what id number range you want, for how many people you expect to make new ids for.
+ - Run this command:
 
 ```
 python make-id-cards.py --prefix "<insert prefix here>" --range <minimum> <maximum+1> --duplicate
