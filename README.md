@@ -256,7 +256,7 @@ If the system ever corrupts or breaks, follow the setup guide above with a few m
 In the section "Backing up the database", after cloning the repository, don't try to create an initial commit. Instead, run the following command:
 
 ```
-mysql < /app/<repo name>/backupdb.sql -u root -p <mysql password>
+mysql < /app/<backup repo name>/backupdb.sql -u root -p <mysql password>
 ```
 
 This should have restored the last backup the system had of the database. Complete the setup from there as normal.
