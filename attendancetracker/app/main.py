@@ -185,7 +185,7 @@ def reports_post(request: Request, identification: str = Form(...), from_date: s
         all_dates.append(entry[sign_in_time_ind].strftime("%Y-%m-%d"))
         if entry[time_today_ind]:
             all_times.append(entry[time_today_ind]/3600)
-            total_time += round(entry[time_today_ind]/3600, 2)
+            total_time += entry[time_today_ind]/3600
     total_time = round(total_time, 2)
     if name:
         report = f"Hello {name}, your ID is {user_id}, your role is {role}, and you've spent {total_time} hours from {from_date[0:10]} to {to_date[0:10]} in robotics this season!"
