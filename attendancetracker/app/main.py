@@ -282,12 +282,13 @@ async def admin_report(request: Request):
                 if row[time_today_ind]:
                     try:
                         data[(row[name_ind], row[id_ind], role)].append([row[sign_in_time_ind], row[time_today_ind]/3600])
-                        data[(row[name_ind], row[id_ind], role)][0] += round(row[time_today_ind]/3600, 2)
+                        data[(row[name_ind], row[id_ind], role)][0] += row[time_today_ind]/3600
+                        data[(row[name_ind], row[id_ind], role)][0] = round(data[(row[name_ind], row[id_ind], role)][0], 2)
                     except KeyError:
                         data[(row[name_ind], row[id_ind], role)] = [0]
                         data[(row[name_ind], row[id_ind], role)].append([row[sign_in_time_ind], row[time_today_ind]/3600])
-                        data[(row[name_ind], row[id_ind], role)][0] += round(row[time_today_ind]/3600, 2)
-                data[(row[name_ind], row[id_ind], role)][0] = round(data[(row[name_ind], row[id_ind], role)][0], 2)
+                        data[(row[name_ind], row[id_ind], role)][0] += row[time_today_ind]/3600
+                        data[(row[name_ind], row[id_ind], role)][0] = round(data[(row[name_ind], row[id_ind], role)][0], 2)
     return templates.TemplateResponse('adminReports.html', context={"request": request, "data": data})
 
 
