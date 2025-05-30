@@ -111,7 +111,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--number-format",
         default="%04d",
-        help="how to format the number in the string. default: %04d",
+        help="how to format the number in the string. default: %%04d",
     )
     parser.add_argument(
         "--logo",
